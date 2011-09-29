@@ -58,7 +58,7 @@ class Coordinate:
         self.strand=strand
 
 
-    def bpcenter(self,other):
+    def bpcenter(self):
         return (self.bpstart+self.bpend)/2
 
     def __eq__(self,other):
