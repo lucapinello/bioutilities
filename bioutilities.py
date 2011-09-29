@@ -57,6 +57,10 @@ class Coordinate:
         self.score=score
         self.strand=strand
 
+
+    def bpcenter(self,other):
+        return (self.bpstart+self.bpend)/2
+
     def __eq__(self,other):
         return (self.chr_id==other.chr_id) & (self.bpstart==other.bpstart) & (self.bpend==other.bpend)
     
@@ -209,6 +213,9 @@ class Coordinate:
     @classmethod
     def coordinates_from_interval(cls,chr_id,interval):
         return Coordinate(chr_id, interval.start,interval.end,)
+
+
+    bpcenter=property(bpcenter)
 
 class Gene:
     
