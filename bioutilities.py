@@ -400,13 +400,13 @@ class Genome_mm:
                 with open(mm_filename,'r+') as f:
                     self.chr[filename]= mmap.mmap(f.fileno(),0) 
                     self.chr_len[filename]=len(self.chr[filename])
-                    print "Chromosome:%s Readed"% str(chr_idx)
+                    print "Chromosome:%s Readed"% filename
     
         print 'Genome initializated'
         
         
     def extract_sequence(self,coordinate):
-        return Sequence(self.chr[coordinate.chr_id][coordinate.bpstart-1:coordinate.bpend])
+        return self.chr[coordinate.chr_id][coordinate.bpstart-1:coordinate.bpend]
     
     
     def estimate_background(self):
