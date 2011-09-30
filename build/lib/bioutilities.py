@@ -320,13 +320,14 @@ class Genome:
         
         for infile in glob.glob( os.path.join(genome_directory, '*.fa') ):
             try:
-                #chr_id=infile.replace(genome_directory,'').replace('.fa','')
-                chr_id=os.path.basename(infile)
+
+                chr_id=os.path.basename(infile).replace('.fa','')
                 self.chr[chr_id] = open(infile,'r')
                 
                 self.chr_len[chr_id]=0
                 
-                for line in  self.chr[chr_id]:
+                self.chr[chr_id].readline()
+                for line in self.chr[chr_id]:
                     self.chr_len[chr_id]+=len(line.strip())
                     
                 print 'Read:'+ infile
@@ -345,7 +346,6 @@ class Genome:
             self.chr[chr_id].seek(0)
             self.chr[chr_id].readline()
             
-            
             for line in self.chr[chr_id]:
                 for nt in counting.keys():
                     counting[nt]+=line.lower().count(nt)
@@ -355,18 +355,23 @@ class Genome:
 
     def read_sequence_from_fasta(self,fin, bpstart, bpend, line_length=50.0):
         bpstart=bpstart-1
+        
         fin.seek(0)
         fin.readline()  #read the first line; the pointer is at the second line
+
         nbp = bpend - bpstart
-        offset = bpstart + math.floor(bpstart/line_length) #assuming each line contains 50 characters; add 1 offset per line
-        fin.seek(int(offset),1)
+        offset = int( bpstart + math.floor(bpstart/line_length)) #assuming each line contains 50 characters; add 1 offset per line
+        
+        if offset > 0:
+            fin.seek(int(offset),1)
+
         seq = fin.read(nbp+int(math.floor(nbp/line_length))+1)
         seq = seq.replace('\n','')
-        fin.close
-        
+ 
         if len(seq) < nbp: 
             print 'Genome range out of scope for ',bpstart,bpend
-        return seq.replace('\n','')[0:nbp].lower()
+        
+        return seq[0:nbp].lower()
         
     
     def extract_sequence(self,coordinate):
@@ -374,7 +379,7 @@ class Genome:
             print "Chromosome %s not readed"% coordinate.chr_id
         else:
             
-            return self.read_sequence_from_fasta(self.chr[coordinate.chr_id],coordinate.bpstart-1,coordinate.bpend)
+            return self.read_sequence_from_fasta(self.chr[coordinate.chr_id],coordinate.bpstart,coordinate.bpend)
 
 class Genome_mm:
     
@@ -386,22 +391,24 @@ class Genome_mm:
 
         for infile in glob.glob( os.path.join(genome_directory, '*.fa') ):
             mm_filename=infile.replace('.fa','.mm')
-            filename=infile.replace(genome_directory,'').replace('.fa','')
             
+            filename=infile.replace(genome_directory,'').replace('.fa','')
+            chr_id=os.path.basename(infile).replace('.fa','')
+
             if not os.path.isfile(mm_filename):
-                print 'Missing:'+filename+' generating memory mapped file (This is necessary only the first time) \n'
+                print 'Missing:'+chr_id+' generating memory mapped file (This is necessary only the first time) \n'
                 with open(infile) as fi:
-                    with open(os.path.join(genome_directory,filename+'.mm'),'w+') as fo:
+                    with open(os.path.join(genome_directory,chr_id+'.mm'),'w+') as fo:
                         #skip header
                         fi.readline()
                         for line in fi:
                             fo.write(line.strip()) 
-                    print 'Memory mapped file generated for:',filename 
+                    print 'Memory mapped file generated for:',chr_id 
             else:
                 with open(mm_filename,'r+') as f:
-                    self.chr[filename]= mmap.mmap(f.fileno(),0) 
-                    self.chr_len[filename]=len(self.chr[filename])
-                    print "Chromosome:%s Readed"% filename
+                    self.chr[chr_id]= mmap.mmap(f.fileno(),0) 
+                    self.chr_len[chr_id]=len(self.chr[chr_id])
+                    print "Chromosome:%s Readed"% chr_id
     
         print 'Genome initializated'
         

@@ -24,6 +24,27 @@ nt2int=constant_minus_one_dict({'a':0,'c':1,'g':2,'t':3})
 int2nt=constant_n_dict({0:'a',1:'c',2:'g',3:'t'})
 nt_complement=dict({'a':'t','c':'g','g':'c','t':'a'})
 
+def read_sequence_from_fasta(fin, bpstart, bpend, line_length=50.0):
+    bpstart=bpstart-1
+    
+    fin.seek(0)
+    fin.readline()  #read the first line; the pointer is at the second line
+
+    nbp = bpend - bpstart
+    offset = int( bpstart + math.floor(bpstart/line_length)) #assuming each line contains 50 characters; add 1 offset per line
+    
+    if offset > 0:
+        fin.seek(int(offset),1)
+
+    seq = fin.read(nbp+int(math.floor(nbp/line_length))+1)
+    seq = seq.replace('\n','')
+
+    if len(seq) < nbp: 
+        print 'Coordinate out of range:',bpstart,bpend
+    
+    return seq[0:nbp].lower()
+
+
 class Coordinate:
     def __init__(self,chr_id,bpstart,bpend,name='ND',score=1.0,strand='ND'):
         self.chr_id=chr_id
@@ -326,7 +347,8 @@ class Genome:
                 
                 self.chr_len[chr_id]=0
                 
-                for line in  self.chr[chr_id]:
+                self.chr[chr_id].readline()
+                for line in self.chr[chr_id]:
                     self.chr_len[chr_id]+=len(line.strip())
                     
                 print 'Read:'+ infile
@@ -345,7 +367,6 @@ class Genome:
             self.chr[chr_id].seek(0)
             self.chr[chr_id].readline()
             
-            
             for line in self.chr[chr_id]:
                 for nt in counting.keys():
                     counting[nt]+=line.lower().count(nt)
@@ -353,28 +374,34 @@ class Genome:
         print counting
         return counting
 
-    def read_sequence_from_fasta(self,fin, bpstart, bpend, line_length=50.0):
-        bpstart=bpstart-1
-        fin.seek(0)
-        fin.readline()  #read the first line; the pointer is at the second line
-        nbp = bpend - bpstart
-        offset = bpstart + math.floor(bpstart/line_length) #assuming each line contains 50 characters; add 1 offset per line
-        fin.seek(int(offset),1)
-        seq = fin.read(nbp+int(math.floor(nbp/line_length))+1)
-        seq = seq.replace('\n','')
-        fin.close
-        
-        if len(seq) < nbp: 
-            print 'Genome range out of scope for ',bpstart,bpend
-        return seq.replace('\n','')[0:nbp].lower()
+
         
     
-    def extract_sequence(self,coordinate):
-        if self.chr[coordinate.chr_id]==None:
-            print "Chromosome %s not readed"% coordinate.chr_id
+    def extract_sequence(self,coordinate, line_length=50.0):
+        if not self.chr.has_key(coordinate.chr_id):
+            print "Chromosome %s not present in the genome" % coordinate.chr_id
         else:
+
+            bpstart=  coordinate.bpstart-1
+            bpend=coordinate.bpend
             
-            return self.read_sequence_from_fasta(self.chr[coordinate.chr_id],coordinate.bpstart-1,coordinate.bpend)
+            self.chr[coordinate.chr_id].seek(0)
+            self.chr[coordinate.chr_id].readline()
+            
+            nbp = bpend - bpstart
+            offset = int( bpstart + math.floor(bpstart/line_length)) 
+
+            if offset > 0:
+                self.chr[coordinate.chr_id].seek(offset,1)
+            
+            seq = self.chr[coordinate.chr_id].read(nbp+int(math.floor(nbp/line_length))+1)
+            seq = seq.replace('\n','')
+            
+            if len(seq) < nbp: 
+                print 'Coordinate out of range:',bpstart,bpend
+            
+            return seq[0:nbp].lower()            
+            
 
 class Genome_mm:
     
