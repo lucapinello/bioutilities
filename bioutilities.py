@@ -333,7 +333,7 @@ class Seq_set(dict):
             print('sequence not found')
 
 class Genome:
-    def __init__(self,genome_directory,release='ND'):
+    def __init__(self,genome_directory,release='ND',verbose=False):
         self.chr=dict()
         self.genome_directory=genome_directory
         self.release=release
@@ -406,9 +406,10 @@ class Genome:
 
 class Genome_mm:
     
-    def __init__(self,genome_directory,auto_load=False):
+    def __init__(self,genome_directory,release='ND',verbose=False):
         self.chr=dict()
         self.genome_directory=genome_directory
+        self.release=release        
         self.chr_len=dict()
         
 
@@ -478,22 +479,6 @@ def set_genome(genome='human'):
 int2chr_id,chr_id2int=set_genome()
 #print int2chr_id,chr_id2int
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 class Genome_2bit():
     
     #def __init__(self, 2bit_genome_file,release='ND'):
@@ -507,7 +492,6 @@ class Genome_2bit():
         except:
             print 'Bad coordinate in genome:',str(c)
         
- 
 
 class Genome:
     def __init__(self,genome_directory,number_of_chromosomes,release='ND'):
