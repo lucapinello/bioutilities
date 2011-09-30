@@ -406,7 +406,7 @@ class Genome_mm:
         
         
     def extract_sequence(self,coordinate):
-        return self.chr[coordinate.chr_id][coordinate.bpstart-1:coordinate.bpend]
+        return self.chr[coordinate.chr_id][coordinate.bpstart-1:coordinate.bpend].lower()
     
     
     def estimate_background(self):
