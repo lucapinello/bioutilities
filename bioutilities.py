@@ -388,14 +388,14 @@ class Genome_mm:
             filename=infile.replace(genome_directory,'').replace('.fa','')
             
             if not os.path.isfile(mm_filename):
-                print 'Missing'+filename+' generating memory mapped file (This is necessary only the first time) \n'
+                print 'Missing:'+filename+' generating memory mapped file (This is necessary only the first time) \n'
                 with open(infile) as fi:
                     with open(filename+'.mm','w+') as fo:
                         #skip header
                         fi.readline()
                         for line in fi:
                             fo.write(line.rstrip()) 
-                    print 'memory mapped file generated!' 
+                    print 'Memory mapped file generated for:',filename 
             else:
                 with open(mm_filename,'r+') as f:
                     self.chr[filename]= mmap.mmap(f.fileno(),0) 
