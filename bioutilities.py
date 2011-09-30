@@ -321,7 +321,7 @@ class Genome:
         for infile in glob.glob( os.path.join(genome_directory, '*.fa') ):
             try:
 
-                chr_id=os.path.basename(infile)
+                chr_id=os.path.basename(infile).replace('.fa','')
                 self.chr[chr_id] = open(infile,'r')
                 
                 self.chr_len[chr_id]=0
@@ -388,7 +388,7 @@ class Genome_mm:
             mm_filename=infile.replace('.fa','.mm')
             
             filename=infile.replace(genome_directory,'').replace('.fa','')
-            chr_id=os.path.basename(infile)
+            chr_id=os.path.basename(infile).replace('.fa','')
 
             if not os.path.isfile(mm_filename):
                 print 'Missing:'+chr_id+' generating memory mapped file (This is necessary only the first time) \n'
