@@ -390,7 +390,7 @@ class Genome_mm:
             if not os.path.isfile(mm_filename):
                 print 'Missing:'+filename+' generating memory mapped file (This is necessary only the first time) \n'
                 with open(infile) as fi:
-                    with open(filename+'.mm','w+') as fo:
+                    with open(os.path.join(genome_directory,filename+'.mm'),'w+') as fo:
                         #skip header
                         fi.readline()
                         for line in fi:
@@ -405,19 +405,19 @@ class Genome_mm:
         print 'Genome initializated'
         
         
-        def extract_sequence(self,coordinate):
-            return Sequence(self.chr[coordinate.chr_id][coordinate.bpstart-1:coordinate.bpend])
-        
-        
-        def estimate_background(self):
-            counting={'a':0,'c':0,'g':0,'t':0}
+    def extract_sequence(self,coordinate):
+        return Sequence(self.chr[coordinate.chr_id][coordinate.bpstart-1:coordinate.bpend])
+    
+    
+    def estimate_background(self):
+        counting={'a':0,'c':0,'g':0,'t':0}
 
-            for chr_id in self.chr.keys():
-                print 'Counting on:',chr_id
-                counting[nt]+=self.chr[chr_id].lower().count(nt)
-            
-            print counting
-            return counting
+        for chr_id in self.chr.keys():
+            print 'Counting on:',chr_id
+            counting[nt]+=self.chr[chr_id].lower().count(nt)
+        
+        print counting
+        return counting
         
         
     
