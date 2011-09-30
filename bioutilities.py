@@ -388,8 +388,9 @@ class Genome:
             self.chr[coordinate.chr_id].seek(0)
             self.chr[coordinate.chr_id].readline()
             
+           
             nbp = bpend - bpstart
-            offset = int( bpstart + math.floor(bpstart/line_length)) 
+            offset = int( bpstart + math.floor(bpstart/line_length))-1 
 
             if offset > 0:
                 self.chr[coordinate.chr_id].seek(offset,1)
@@ -430,7 +431,7 @@ class Genome_mm:
                 with open(mm_filename,'r+') as f:
                     self.chr[chr_id]= mmap.mmap(f.fileno(),0) 
                     self.chr_len[chr_id]=len(self.chr[chr_id])
-                    print "Chromosome:%s Readed"% chr_id
+                    print "Chromosome:%s Read"% chr_id
     
         print 'Genome initializated'
         
