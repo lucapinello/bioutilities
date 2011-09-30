@@ -320,7 +320,8 @@ class Genome:
         
         for infile in glob.glob( os.path.join(genome_directory, '*.fa') ):
             try:
-                chr_id=infile.replace(genome_directory,'').replace('.fa','')
+
+                chr_id=os.path.basename(infile)
                 self.chr[chr_id] = open(infile,'r')
                 
                 self.chr_len[chr_id]=0
@@ -328,7 +329,7 @@ class Genome:
                 for line in  self.chr[chr_id]:
                     self.chr_len[chr_id]+=len(line.strip())
                     
-                print 'Readed:'+ infile
+                print 'Read:'+ infile
             except:
                 print 'Error, not loaded:',infile
         
@@ -373,7 +374,7 @@ class Genome:
             print "Chromosome %s not readed"% coordinate.chr_id
         else:
             
-            return self.read_sequence_from_fasta(self.chr[coordinate.chr_id],coordinate.bpstart,coordinate.bpend)
+            return self.read_sequence_from_fasta(self.chr[coordinate.chr_id],coordinate.bpstart-1,coordinate.bpend)
 
 class Genome_mm:
     
@@ -385,22 +386,24 @@ class Genome_mm:
 
         for infile in glob.glob( os.path.join(genome_directory, '*.fa') ):
             mm_filename=infile.replace('.fa','.mm')
-            filename=infile.replace(genome_directory,'').replace('.fa','')
             
+            filename=infile.replace(genome_directory,'').replace('.fa','')
+            chr_id=os.path.basename(infile)
+
             if not os.path.isfile(mm_filename):
-                print 'Missing:'+filename+' generating memory mapped file (This is necessary only the first time) \n'
+                print 'Missing:'+chr_id+' generating memory mapped file (This is necessary only the first time) \n'
                 with open(infile) as fi:
-                    with open(os.path.join(genome_directory,filename+'.mm'),'w+') as fo:
+                    with open(os.path.join(genome_directory,chr_id+'.mm'),'w+') as fo:
                         #skip header
                         fi.readline()
                         for line in fi:
-                            fo.write(line.rstrip()) 
-                    print 'Memory mapped file generated for:',filename 
+                            fo.write(line.strip()) 
+                    print 'Memory mapped file generated for:',chr_id 
             else:
                 with open(mm_filename,'r+') as f:
-                    self.chr[filename]= mmap.mmap(f.fileno(),0) 
-                    self.chr_len[filename]=len(self.chr[filename])
-                    print "Chromosome:%s Readed"% filename
+                    self.chr[chr_id]= mmap.mmap(f.fileno(),0) 
+                    self.chr_len[chr_id]=len(self.chr[chr_id])
+                    print "Chromosome:%s Readed"% chr_id
     
         print 'Genome initializated'
         

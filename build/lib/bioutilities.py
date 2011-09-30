@@ -320,7 +320,8 @@ class Genome:
         
         for infile in glob.glob( os.path.join(genome_directory, '*.fa') ):
             try:
-                chr_id=infile.replace(genome_directory,'').replace('.fa','')
+                #chr_id=infile.replace(genome_directory,'').replace('.fa','')
+                chr_id=os.path.basename(infile)
                 self.chr[chr_id] = open(infile,'r')
                 
                 self.chr_len[chr_id]=0
@@ -328,7 +329,7 @@ class Genome:
                 for line in  self.chr[chr_id]:
                     self.chr_len[chr_id]+=len(line.strip())
                     
-                print 'Readed:'+ infile
+                print 'Read:'+ infile
             except:
                 print 'Error, not loaded:',infile
         
@@ -373,7 +374,7 @@ class Genome:
             print "Chromosome %s not readed"% coordinate.chr_id
         else:
             
-            return self.read_sequence_from_fasta(self.chr[coordinate.chr_id],coordinate.bpstart,coordinate.bpend)
+            return self.read_sequence_from_fasta(self.chr[coordinate.chr_id],coordinate.bpstart-1,coordinate.bpend)
 
 class Genome_mm:
     
@@ -394,7 +395,7 @@ class Genome_mm:
                         #skip header
                         fi.readline()
                         for line in fi:
-                            fo.write(line.rstrip()) 
+                            fo.write(line.strip()) 
                     print 'Memory mapped file generated for:',filename 
             else:
                 with open(mm_filename,'r+') as f:
@@ -406,7 +407,7 @@ class Genome_mm:
         
         
     def extract_sequence(self,coordinate):
-        return self.chr[coordinate.chr_id][coordinate.bpstart-1:coordinate.bpend]
+        return self.chr[coordinate.chr_id][coordinate.bpstart-1:coordinate.bpend].lower()
     
     
     def estimate_background(self):
