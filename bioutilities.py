@@ -428,11 +428,11 @@ class Genome_mm:
                         for line in fi:
                             fo.write(line.strip()) 
                     print 'Memory mapped file generated for:',chr_id 
-            else:
-                with open(mm_filename,'r+') as f:
-                    self.chr[chr_id]= mmap.mmap(f.fileno(),0) 
-                    self.chr_len[chr_id]=len(self.chr[chr_id])
-                    print "Chromosome:%s Read"% chr_id
+
+            with open(mm_filename,'r+') as f:
+                self.chr[chr_id]= mmap.mmap(f.fileno(),0) 
+                self.chr_len[chr_id]=len(self.chr[chr_id])
+                print "Chromosome:%s Read"% chr_id
     
         print 'Genome initializated'
         
