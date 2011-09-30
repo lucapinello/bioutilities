@@ -333,7 +333,7 @@ class Seq_set(dict):
             print('sequence not found')
 
 class Genome:
-    def __init__(self,genome_directory,release='ND'):
+    def __init__(self,genome_directory,release='ND',verbose=False):
         self.chr=dict()
         self.genome_directory=genome_directory
         self.release=release
@@ -350,18 +350,22 @@ class Genome:
                 self.chr[chr_id].readline()
                 for line in self.chr[chr_id]:
                     self.chr_len[chr_id]+=len(line.strip())
-                    
-                print 'Read:'+ infile
+                
+                if verbose:    
+                    print 'Read:'+ infile
             except:
-                print 'Error, not loaded:',infile
+                if verbose:
+                    print 'Error, not loaded:',infile
         
-        print 'Genome initializated'
+        if verbose:
+            print 'Genome initializated'
             
     def estimate_background(self):
         counting={'a':0,'c':0,'g':0,'t':0}
 
         for chr_id in self.chr.keys():
-            print 'Counting on:',chr_id
+            if verbose:
+                print 'Counting on:',chr_id
             
 
             self.chr[chr_id].seek(0)
@@ -370,49 +374,47 @@ class Genome:
             for line in self.chr[chr_id]:
                 for nt in counting.keys():
                     counting[nt]+=line.lower().count(nt)
+        if verbose:
+            print counting
         
-        print counting
         return counting
 
-
-        
     
     def extract_sequence(self,coordinate, line_length=50.0):
         if not self.chr.has_key(coordinate.chr_id):
-            print "Chromosome %s not present in the genome" % coordinate.chr_id
+            if verbose:
+                print "Warning: chromosome %s not present in the genome" % coordinate.chr_id
         else:
 
             bpstart=  coordinate.bpstart-1
             bpend=coordinate.bpend
             
             self.chr[coordinate.chr_id].seek(0)
-            head=self.chr[coordinate.chr_id].readline()
+            self.chr[coordinate.chr_id].readline()
             
-            print 'head',head
-            
-            print 'adesso l''altra merda'
-            
+           
             nbp = bpend - bpstart
-            offset = int( bpstart + math.floor(bpstart/line_length)) 
+            offset = int( bpstart + math.floor(bpstart/line_length))-1 
 
             if offset > 0:
-                print offset                
                 self.chr[coordinate.chr_id].seek(offset,1)
             
             seq = self.chr[coordinate.chr_id].read(nbp+int(math.floor(nbp/line_length))+1)
             seq = seq.replace('\n','')
             
             if len(seq) < nbp: 
-                print 'Coordinate out of range:',bpstart,bpend
+                if verbose:
+                    print 'Warning: coordinate out of range:',bpstart,bpend
             
             return seq[0:nbp].lower()            
             
 
 class Genome_mm:
     
-    def __init__(self,genome_directory,auto_load=False):
+    def __init__(self,genome_directory,release='ND',verbose=False):
         self.chr=dict()
         self.genome_directory=genome_directory
+        self.release=release        
         self.chr_len=dict()
         
 
@@ -423,21 +425,25 @@ class Genome_mm:
             chr_id=os.path.basename(infile).replace('.fa','')
 
             if not os.path.isfile(mm_filename):
-                print 'Missing:'+chr_id+' generating memory mapped file (This is necessary only the first time) \n'
+                if verbose:
+                    print 'Missing:'+chr_id+' generating memory mapped file (This is necessary only the first time) \n'
                 with open(infile) as fi:
                     with open(os.path.join(genome_directory,chr_id+'.mm'),'w+') as fo:
                         #skip header
                         fi.readline()
                         for line in fi:
                             fo.write(line.strip()) 
-                    print 'Memory mapped file generated for:',chr_id 
-            else:
-                with open(mm_filename,'r+') as f:
-                    self.chr[chr_id]= mmap.mmap(f.fileno(),0) 
-                    self.chr_len[chr_id]=len(self.chr[chr_id])
-                    print "Chromosome:%s Readed"% chr_id
+                    if verbose:
+                        print 'Memory mapped file generated for:',chr_id 
+
+            with open(mm_filename,'r+') as f:
+                self.chr[chr_id]= mmap.mmap(f.fileno(),0) 
+                self.chr_len[chr_id]=len(self.chr[chr_id])
+                if verbose:
+                    print "Chromosome:%s Read"% chr_id
     
-        print 'Genome initializated'
+        if verbose:
+            print 'Genome initializated'
         
         
     def extract_sequence(self,coordinate):
@@ -448,14 +454,15 @@ class Genome_mm:
         counting={'a':0,'c':0,'g':0,'t':0}
 
         for chr_id in self.chr.keys():
-            print 'Counting on:',chr_id
+            if verbose:
+                print 'Counting on:',chr_id
             counting[nt]+=self.chr[chr_id].lower().count(nt)
         
-        print counting
+        if verbose:
+            print counting
+        
         return counting
-        
-        
-    
+
 
 
 ''' OLD STUFF
@@ -482,22 +489,6 @@ def set_genome(genome='human'):
 int2chr_id,chr_id2int=set_genome()
 #print int2chr_id,chr_id2int
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 class Genome_2bit():
     
     #def __init__(self, 2bit_genome_file,release='ND'):
@@ -511,7 +502,6 @@ class Genome_2bit():
         except:
             print 'Bad coordinate in genome:',str(c)
         
- 
 
 class Genome:
     def __init__(self,genome_directory,number_of_chromosomes,release='ND'):

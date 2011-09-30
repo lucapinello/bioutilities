@@ -160,7 +160,7 @@ class Coordinate:
                         strand='ND'
                     coordinates.append(Coordinate(str(chr_id), int(bpstart), int(bpend), name, score,strand))
                 except:
-                    print 'bad line',line
+                    print 'Skipping line:',line
 
             return coordinates
     
