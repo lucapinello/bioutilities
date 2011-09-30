@@ -24,31 +24,6 @@ nt2int=constant_minus_one_dict({'a':0,'c':1,'g':2,'t':3})
 int2nt=constant_n_dict({0:'a',1:'c',2:'g',3:'t'})
 nt_complement=dict({'a':'t','c':'g','g':'c','t':'a'})
 
-
-def set_genome(genome='human'):
-    if genome=='human':
-        int2chr_id=dict(enumerate(['chr'+id for id in (map(str,range(1,23))+['X','Y'])],start=1));
-    elif genome=='mouse':
-        int2chr_id=dict(enumerate(['chr'+id for id in (map(str,range(1,20))+['X','Y','M'] ) ],start=1));
-    else:
-        raise Exception('not implemented')
-    
-    chr_id2int=dict((v,k) for k, v in int2chr_id.iteritems())
-    
-    return int2chr_id,chr_id2int
-
-#HUMAN
-#int2chr_id=dict(enumerate(['chr'+id for id in (map(str,range(1,23))+['X','Y'])],start=1));
-
-#MOUSE
-#int2chr_id=dict(enumerate(['chr'+id for id in (map(str,range(1,20))+['X','Y','M'] ) ],start=1));
-#chr_id2int=dict((v,k) for k, v in int2chr_id.iteritems());
-
-
-int2chr_id,chr_id2int=set_genome()
-#print int2chr_id,chr_id2int
-
-
 class Coordinate:
     def __init__(self,chr_id,bpstart,bpend,name='ND',score=1.0,strand='ND'):
         self.chr_id=chr_id
@@ -449,6 +424,45 @@ class Genome_mm:
 
 
 ''' OLD STUFF
+def set_genome(genome='human'):
+    if genome=='human':
+        int2chr_id=dict(enumerate(['chr'+id for id in (map(str,range(1,23))+['X','Y'])],start=1));
+    elif genome=='mouse':
+        int2chr_id=dict(enumerate(['chr'+id for id in (map(str,range(1,20))+['X','Y','M'] ) ],start=1));
+    else:
+        raise Exception('not implemented')
+    
+    chr_id2int=dict((v,k) for k, v in int2chr_id.iteritems())
+    
+    return int2chr_id,chr_id2int
+
+#HUMAN
+#int2chr_id=dict(enumerate(['chr'+id for id in (map(str,range(1,23))+['X','Y'])],start=1));
+
+#MOUSE
+#int2chr_id=dict(enumerate(['chr'+id for id in (map(str,range(1,20))+['X','Y','M'] ) ],start=1));
+#chr_id2int=dict((v,k) for k, v in int2chr_id.iteritems());
+
+
+int2chr_id,chr_id2int=set_genome()
+#print int2chr_id,chr_id2int
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 class Genome_2bit():
     
     #def __init__(self, 2bit_genome_file,release='ND'):
