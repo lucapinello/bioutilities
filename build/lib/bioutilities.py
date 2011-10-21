@@ -12,6 +12,10 @@ import math
 #from Bio import SeqIO
 #from twobitreader import TwoBitFile
 
+
+def chunks(l, n):
+ return [l[i:i+n] for i in range(0, len(l), n)]
+
 class constant_minus_one_dict (dict):
     def __missing__ (self, key):
         return -1
@@ -160,7 +164,7 @@ class Coordinate:
                         strand='ND'
                     coordinates.append(Coordinate(str(chr_id), int(bpstart), int(bpend), name, score,strand))
                 except:
-                    print 'bad line',line
+                    print 'Skipping line:',line
 
             return coordinates
     
@@ -210,6 +214,15 @@ class Coordinate:
     @classmethod
     def coordinates_from_interval(cls,chr_id,interval):
         return Coordinate(chr_id, interval.start,interval.end,)
+    
+    @classmethod
+    def coordinates_to_fasta(cls,coordinates,fasta_file,genome,chars_per_line=50):
+        with open(fasta_file,'w+') as outfile:
+            print 'file aperto'
+            for c in coordinates:
+                seq=genome.extract_sequence(c)
+                out_file.write('>'+str(Coordinate(chr_id,bpstart,bpend,strand=strand))+'\n'+'\n'.join(chunks(seq,chars_per_line)))+'\n'
+    
 
 
     bpcenter=property(bpcenter)
