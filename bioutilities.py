@@ -218,7 +218,6 @@ class Coordinate:
     @classmethod
     def coordinates_to_fasta(cls,coordinates,fasta_file,genome,chars_per_line=50):
         with open(fasta_file,'w+') as outfile:
-            print 'file aperto'
             for c in coordinates:
                 seq=genome.extract_sequence(c)
                 out_file.write('>'+str(Coordinate(chr_id,bpstart,bpend,strand=strand))+'\n'+'\n'.join(chunks(seq,chars_per_line)))+'\n'
