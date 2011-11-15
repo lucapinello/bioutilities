@@ -8,6 +8,7 @@ import xlrd
 from scipy.stats import rv_discrete
 import mmap
 import math
+import subprocess
 
 #from Bio import SeqIO
 #from twobitreader import TwoBitFile
