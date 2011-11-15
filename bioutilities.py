@@ -9,6 +9,7 @@ from scipy.stats import rv_discrete
 import mmap
 import math
 import subprocess
+import numpy as np
 
 #from Bio import SeqIO
 #from twobitreader import TwoBitFile
