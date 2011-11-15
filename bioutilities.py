@@ -534,7 +534,26 @@ class Fimo:
                     
         return list(motifs_in_sequence)
 
+def build_motif_in_seq_matrix(bed_filename,genome_directory,meme_motifs_filename,bg_filename):
 
+    print 'Loading coordinates  from bed'
+    target_coords=Coordinate.bed_to_coordinates(bed_filename)
+
+    print 'Initialize Genome'
+    genome=Genome_mm(genome_directory)
+
+    print 'Initilize Fimo and load motifs'
+    fimo=Fimo(meme_motifs_filename,bg_filename)
+
+    print 'Initialize the matrix'
+    motifs_in_sequences_matrix=np.zeros((len(target_coords),len(fimo.motif_names)))
+
+    for idx_seq,c in enumerate(target_coords):
+        seq=genome.extract_sequence(c)
+        print idx_seq, len(target_coords)
+        motifs_in_sequences_matrix[idx_seq,fimo.extract_motifs(seq,set_mode=True)]=1
+
+    return motifs_in_sequences_matrix, fimo.motif_names
 
 ''' OLD STUFF
 def set_genome(genome='human'):
