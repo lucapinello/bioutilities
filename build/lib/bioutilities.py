@@ -218,7 +218,6 @@ class Coordinate:
     @classmethod
     def coordinates_to_fasta(cls,coordinates,fasta_file,genome,chars_per_line=50):
         with open(fasta_file,'w+') as outfile:
-            print 'file aperto'
             for c in coordinates:
                 seq=genome.extract_sequence(c)
                 out_file.write('>'+str(Coordinate(chr_id,bpstart,bpend,strand=strand))+'\n'+'\n'.join(chunks(seq,chars_per_line)))+'\n'
@@ -449,7 +448,7 @@ class Genome_mm:
                     if verbose:
                         print 'Memory mapped file generated for:',chr_id 
 
-            with open(mm_filename,'r+') as f:
+            with open(mm_filename,'r') as f:
                 self.chr[chr_id]= mmap.mmap(f.fileno(),0) 
                 self.chr_len[chr_id]=len(self.chr[chr_id])
                 if verbose:
@@ -475,6 +474,64 @@ class Genome_mm:
             print counting
         
         return counting
+
+
+class Fimo:
+    def __init__(self,meme_motifs_filename, bg_filename,p_value=1.e-5,temp_filename='tmp.fasta'):
+
+        self.fimo_command= 'fimo --text --output-pthresh '+str(p_value)+'  -bgfile '+bg_filename+' '+meme_motifs_filename+' '+str(temp_filename) 
+        self.temp_filename=temp_filename
+        
+        with open(meme_motifs_filename) as infile:
+            self.motif_id_to_name=dict()
+            self.motif_names=[]
+            self.motif_name_to_index=dict()
+            self.motif_ids=[]
+            motif_index=0
+            for line in infile:
+                if 'MOTIF' in line:
+                    self.motif_id_to_name[line.split()[1]]=line.split()[2]
+                    self.motif_name_to_index[line.split()[2]]=motif_index
+                    self.motif_ids.append(line.split()[1])
+                    self.motif_names.append(line.split()[2])
+                    motif_index+=1
+
+        
+    def extract_motifs(self,seq, set_mode=False):
+        if set_mode:
+            motifs_in_sequence=set()
+        else:
+            motifs_in_sequence=list()
+            
+        f_out=open(self.temp_filename,'w+')
+        f_out.write(''.join(['>\n',seq,'>\n']))
+        f_out.close()
+
+        fimo_process=subprocess.Popen(self.fimo_command,stdin=None,stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
+        output=fimo_process.communicate()[0]
+        fimo_process.wait()
+
+        lines=output.split('\n')
+        lines=lines[1:]
+        for line in lines:
+            if line:
+                fields=line.split('\t')
+                motif_id=fields[0]
+                motif_name=self.motif_id_to_name[motif_id]
+
+                if not set_mode:
+                    c_start=float(fields[2])
+                    c_end=float(fields[3])
+                    strand=fields[4]
+                    score=float(fields[5])
+                    p_value=float(fields[6])
+                    
+                    
+                    motifs_in_sequence.append({'id':motif_id,'name':motif_name,'start':c_start,'end':c_end,'strand':strand,'score':score,'p_value':p_value})
+                else:
+                    motifs_in_sequence.add(self.motif_name_to_index[motif_name])
+                    
+        return list(motifs_in_sequence)
 
 
 

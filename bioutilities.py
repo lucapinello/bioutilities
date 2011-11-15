@@ -449,7 +449,7 @@ class Genome_mm:
                         print 'Memory mapped file generated for:',chr_id 
 
             with open(mm_filename,'r') as f:
-                self.chr[chr_id]= mmap.mmap(f.fileno(),0) 
+                self.chr[chr_id]= mmap.mmap(f.fileno(),0, access=mmap.ACCESS_READ) 
                 self.chr_len[chr_id]=len(self.chr[chr_id])
                 if verbose:
                     print "Chromosome:%s Read"% chr_id
