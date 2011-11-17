@@ -388,8 +388,9 @@ class Genome:
             
             for line in self.chr[chr_id]:
                 for nt in counting.keys():
-                    counting[nt]+=line.lower().count(nt)
-                    all+=line.lower().count(nt)
+                    count_nt=line.lower().count(nt)
+                    counting[nt]+=count_nt
+                    all+=count_nt
         
         if self.verbose:
             print counting
@@ -479,7 +480,10 @@ class Genome_mm:
 
             
             for nt in counting.keys():
-                counting[nt]+=self.chr[chr_id][:].lower().count(nt)
+                
+                count_nt=self.chr[chr_id][:].lower().count(nt)
+                counting[nt]+=count_nt
+                all+=count_nt
         
         if self.verbose:
             print counting
