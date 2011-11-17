@@ -376,22 +376,27 @@ class Genome:
             print 'Genome initializated'
             
     def estimate_background(self):
-        counting={'a':0,'c':0,'g':0,'t':0}
-
+        counting={'a':.0,'c':.0,'g':.0,'t':.0}
+        all=0.0
+        
         for chr_id in self.chr.keys():
             if self.verbose:
                 print 'Counting on:',chr_id
             
-
             self.chr[chr_id].seek(0)
             self.chr[chr_id].readline()
             
             for line in self.chr[chr_id]:
                 for nt in counting.keys():
                     counting[nt]+=line.lower().count(nt)
+                    all+=line.lower().count(nt)
+        
         if self.verbose:
             print counting
         
+        for nt in counting.keys():
+            counting[nt]/=all
+            
         return counting
 
     
@@ -466,8 +471,8 @@ class Genome_mm:
     
 
     def estimate_background(self):
-        counting={'a':0,'c':0,'g':0,'t':0}
-
+        counting={'a':.0,'c':.0,'g':.0,'t':.0}
+        all=0.0
         for chr_id in self.chr.keys():
             if self.verbose:
                 print 'Counting on:',chr_id
@@ -478,6 +483,10 @@ class Genome_mm:
         
         if self.verbose:
             print counting
+
+
+        for nt in counting.keys():
+            counting[nt]/=all
         
         return counting
     
