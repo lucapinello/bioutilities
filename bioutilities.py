@@ -474,7 +474,7 @@ class Genome_mm:
 
             
             for nt in counting.keys():
-                counting[nt]+=self.chr[chr_id].lower().count(nt)
+                counting[nt]+=self.chr[chr_id][:].lower().count(nt)
         
         if self.verbose:
             print counting
