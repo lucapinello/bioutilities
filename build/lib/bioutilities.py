@@ -9,6 +9,7 @@ from scipy.stats import rv_discrete
 import mmap
 import math
 import subprocess
+import numpy as np
 
 #from Bio import SeqIO
 #from twobitreader import TwoBitFile
@@ -534,13 +535,16 @@ class Fimo:
                     
         return list(motifs_in_sequence)
 
-def build_motif_in_seq_matrix(bed_filename,genome_directory,meme_motifs_filename,bg_filename):
+def build_motif_in_seq_matrix(bed_filename,genome_directory,meme_motifs_filename,bg_filename,genome_mm=True):
 
     print 'Loading coordinates  from bed'
     target_coords=Coordinate.bed_to_coordinates(bed_filename)
 
     print 'Initialize Genome'
-    genome=Genome_mm(genome_directory)
+    if genome_mm:
+        genome=Genome_mm(genome_directory)
+    else:
+        genome=Genome(genome_directory)
 
     print 'Initilize Fimo and load motifs'
     fimo=Fimo(meme_motifs_filename,bg_filename)
@@ -554,6 +558,37 @@ def build_motif_in_seq_matrix(bed_filename,genome_directory,meme_motifs_filename
         motifs_in_sequences_matrix[idx_seq,fimo.extract_motifs(seq,set_mode=True)]=1
 
     return motifs_in_sequences_matrix, fimo.motif_names
+
+
+def extract_bg_from_bed(bed_filename,genome_directory,bg_filename,genome_mm=True):
+    
+    acgt_fq={'a':0.0,'c':0.0,'g':0.0,'t':0.0}
+    total=0
+
+    print 'Loading coordinates  from bed'
+    target_coords=Coordinate.bed_to_coordinates(bed_filename)
+
+    print 'Initialize Genome'
+    if genome_mm:
+        genome=Genome_mm(genome_directory)
+    else:
+        genome=Genome(genome_directory)
+    
+    for idx_seq,c in enumerate(target_coords):
+        seq=genome.extract_sequence(c)
+        for nt in ['a','c','t','g']:
+            acgt_fq[nt]+=seq.count(nt)
+            total+=acgt_fq[nt]
+
+    for nt in ['a','c','t','g']:
+        acgt_fq[nt]/=total
+
+          
+    print acgt_fq
+    with open(bg_filename, 'w+') as out_file:
+        for nt in ['a','c','t','g']:
+            out_file.write('%s\t%1.4f\n' % (nt,acgt_fq[nt]))
+
 
 ''' OLD STUFF
 def set_genome(genome='human'):

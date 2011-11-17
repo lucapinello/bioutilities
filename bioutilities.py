@@ -506,7 +506,7 @@ class Fimo:
             motifs_in_sequence=list()
             
         f_out=open(self.temp_filename,'w+')
-        f_out.write(''.join(['>\n',seq,'>\n']))
+        f_out.write(''.join(['>\n',seq,'\n']))
         f_out.close()
 
         fimo_process=subprocess.Popen(self.fimo_command,stdin=None,stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
