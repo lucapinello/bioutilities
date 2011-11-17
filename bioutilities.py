@@ -464,19 +464,23 @@ class Genome_mm:
     def extract_sequence(self,coordinate):
         return self.chr[coordinate.chr_id][coordinate.bpstart-1:coordinate.bpend].lower()
     
-    
+
     def estimate_background(self):
         counting={'a':0,'c':0,'g':0,'t':0}
 
         for chr_id in self.chr.keys():
             if self.verbose:
                 print 'Counting on:',chr_id
-            counting[nt]+=self.chr[chr_id].lower().count(nt)
+
+            
+            for nt in counting.keys():
+                counting[nt]+=self.chr[chr_id].lower().count(nt)
         
         if self.verbose:
             print counting
         
         return counting
+    
 
 
 class Fimo:
