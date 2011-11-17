@@ -352,6 +352,7 @@ class Genome:
         self.genome_directory=genome_directory
         self.release=release
         self.chr_len=dict()
+        self.verbose=verbose
         
         for infile in glob.glob( os.path.join(genome_directory, '*.fa') ):
             try:
@@ -378,7 +379,7 @@ class Genome:
         counting={'a':0,'c':0,'g':0,'t':0}
 
         for chr_id in self.chr.keys():
-            if verbose:
+            if self.verbose:
                 print 'Counting on:',chr_id
             
 
@@ -388,7 +389,7 @@ class Genome:
             for line in self.chr[chr_id]:
                 for nt in counting.keys():
                     counting[nt]+=line.lower().count(nt)
-        if verbose:
+        if self.verbose:
             print counting
         
         return counting
@@ -396,7 +397,7 @@ class Genome:
     
     def extract_sequence(self,coordinate, line_length=50.0):
         if not self.chr.has_key(coordinate.chr_id):
-            if verbose:
+            if self.verbose:
                 print "Warning: chromosome %s not present in the genome" % coordinate.chr_id
         else:
 
@@ -417,7 +418,7 @@ class Genome:
             seq = seq.replace('\n','')
             
             if len(seq) < nbp: 
-                if verbose:
+                if self.verbose:
                     print 'Warning: coordinate out of range:',bpstart,bpend
             
             return seq[0:nbp].lower()            
@@ -430,7 +431,7 @@ class Genome_mm:
         self.genome_directory=genome_directory
         self.release=release        
         self.chr_len=dict()
-        
+        self.verbose=verbose
 
         for infile in glob.glob( os.path.join(genome_directory, '*.fa') ):
             mm_filename=infile.replace('.fa','.mm')
@@ -472,7 +473,7 @@ class Genome_mm:
                 print 'Counting on:',chr_id
             counting[nt]+=self.chr[chr_id].lower().count(nt)
         
-        if verbose:
+        if self.verbose:
             print counting
         
         return counting
