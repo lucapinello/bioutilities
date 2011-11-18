@@ -498,7 +498,7 @@ class Genome_mm:
 
 
 class Fimo:
-    def __init__(self,meme_motifs_filename, bg_filename,p_value=1.e-5,temp_directory=None):
+    def __init__(self,meme_motifs_filename, bg_filename,p_value=1.e-4,,temp_directory=None):
 
         self.fimo_command= 'fimo --text --output-pthresh '+str(p_value)+'  -bgfile '+bg_filename+' '+meme_motifs_filename 
         self.temp_directory=temp_directory
@@ -525,15 +525,17 @@ class Fimo:
             motifs_in_sequence=list()
         
         with tempfile.NamedTemporaryFile('w+',dir=self.temp_directory,delete=False) as tmp_file:
-
             tmp_file.write(''.join(['>\n',seq,'\n']))
             tmp_filename=tmp_file.name
             tmp_file.close()
             
+            print tmp_filename
+            print self.fimo_command+' '+tmp_filename
+            
             fimo_process=subprocess.Popen(self.fimo_command+' '+tmp_filename,stdin=None,stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
             output=fimo_process.communicate()[0]
             fimo_process.wait()
-            
+            fimo
             
             print output
             os.remove(tmp_filename)
