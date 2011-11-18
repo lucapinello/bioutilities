@@ -572,7 +572,7 @@ def build_motif_in_seq_matrix(bed_filename,genome_directory,meme_motifs_filename
         genome=Genome(genome_directory)
 
     print 'Initilize Fimo and load motifs'
-    fimo=Fimo(meme_motifs_filename,bg_filename,temp_filename)
+    fimo=Fimo(meme_motifs_filename,bg_filename,temp_directory)
 
     print 'Initialize the matrix'
     motifs_in_sequences_matrix=np.zeros((len(target_coords),len(fimo.motif_names)))
