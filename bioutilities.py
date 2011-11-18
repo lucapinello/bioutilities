@@ -535,8 +535,7 @@ class Fimo:
             fimo_process=subprocess.Popen(self.fimo_command+' '+tmp_filename,stdin=None,stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
             output=fimo_process.communicate()[0]
             fimo_process.wait()
-            fimo
-            
+                       
             print output
             os.remove(tmp_filename)
             
