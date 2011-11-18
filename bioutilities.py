@@ -10,7 +10,8 @@ import mmap
 import math
 import subprocess
 import numpy as np
-
+import tempfile
+import os
 #from Bio import SeqIO
 #from twobitreader import TwoBitFile
 
@@ -497,10 +498,10 @@ class Genome_mm:
 
 
 class Fimo:
-    def __init__(self,meme_motifs_filename, bg_filename,p_value=1.e-5,temp_filename='tmp.fasta'):
+    def __init__(self,meme_motifs_filename, bg_filename,p_value=1.e-5,temp_directory=None):
 
-        self.fimo_command= 'fimo --text --output-pthresh '+str(p_value)+'  -bgfile '+bg_filename+' '+meme_motifs_filename+' '+str(temp_filename) 
-        self.temp_filename=temp_filename
+        self.fimo_command= 'fimo --text --output-pthresh '+str(p_value)+'  -bgfile '+bg_filename+' '+meme_motifs_filename 
+        self.temp_directory=temp_directory
         
         with open(meme_motifs_filename) as infile:
             self.motif_id_to_name=dict()
@@ -522,38 +523,44 @@ class Fimo:
             motifs_in_sequence=set()
         else:
             motifs_in_sequence=list()
+        
+        with tempfile.NamedTemporaryFile('w+',dir=self.temp_directory,delete=False) as tmp_file:
+
+            tmp_file.write(''.join(['>\n',seq,'\n']))
+            tmp_filename=tmp_file.name
+            tmp_file.close()
             
-        f_out=open(self.temp_filename,'w+')
-        f_out.write(''.join(['>\n',seq,'\n']))
-        f_out.close()
-
-        fimo_process=subprocess.Popen(self.fimo_command,stdin=None,stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
-        output=fimo_process.communicate()[0]
-        fimo_process.wait()
-
-        lines=output.split('\n')
-        lines=lines[1:]
-        for line in lines:
-            if line:
-                fields=line.split('\t')
-                motif_id=fields[0]
-                motif_name=self.motif_id_to_name[motif_id]
-
-                if not set_mode:
-                    c_start=float(fields[2])
-                    c_end=float(fields[3])
-                    strand=fields[4]
-                    score=float(fields[5])
-                    p_value=float(fields[6])
-                    
-                    
-                    motifs_in_sequence.append({'id':motif_id,'name':motif_name,'start':c_start,'end':c_end,'strand':strand,'score':score,'p_value':p_value})
-                else:
-                    motifs_in_sequence.add(self.motif_name_to_index[motif_name])
+            fimo_process=subprocess.Popen(self.fimo_command+' '+tmp_filename,stdin=None,stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
+            output=fimo_process.communicate()[0]
+            fimo_process.wait()
+            
+            
+            print output
+            os.remove(tmp_filename)
+            
+            lines=output.split('\n')
+            lines=lines[1:]
+            for line in lines:
+                if line:
+                    fields=line.split('\t')
+                    motif_id=fields[0]
+                    motif_name=self.motif_id_to_name[motif_id]
+    
+                    if not set_mode:
+                        c_start=float(fields[2])
+                        c_end=float(fields[3])
+                        strand=fields[4]
+                        score=float(fields[5])
+                        p_value=float(fields[6])
+                        
+                        
+                        motifs_in_sequence.append({'id':motif_id,'name':motif_name,'start':c_start,'end':c_end,'strand':strand,'score':score,'p_value':p_value})
+                    else:
+                        motifs_in_sequence.add(self.motif_name_to_index[motif_name])
                     
         return list(motifs_in_sequence)
 
-def build_motif_in_seq_matrix(bed_filename,genome_directory,meme_motifs_filename,bg_filename,genome_mm=True,temp_filename='tmp.fasta'):
+def build_motif_in_seq_matrix(bed_filename,genome_directory,meme_motifs_filename,bg_filename,genome_mm=True,temp_directory=None):
 
     print 'Loading coordinates  from bed'
     target_coords=Coordinate.bed_to_coordinates(bed_filename)
