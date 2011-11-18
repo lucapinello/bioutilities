@@ -529,13 +529,13 @@ class Fimo:
             tmp_filename=tmp_file.name
             tmp_file.close()
             
-            print tmp_filename
-            print self.fimo_command+' '+tmp_filename
+            #print tmp_filename
+            #print self.fimo_command+' '+tmp_filename
             
             fimo_process=subprocess.Popen(self.fimo_command+' '+tmp_filename,stdin=None,stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
             output=fimo_process.communicate()[0]
             fimo_process.wait()
-            print output
+            #print output
             
             os.remove(tmp_filename)
             
