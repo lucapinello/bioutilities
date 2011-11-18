@@ -498,7 +498,7 @@ class Genome_mm:
 
 
 class Fimo:
-    def __init__(self,meme_motifs_filename, bg_filename,p_value=1.e-4,,temp_directory=None):
+    def __init__(self,meme_motifs_filename, bg_filename,p_value=1.e-4,temp_directory=None):
 
         self.fimo_command= 'fimo --text --output-pthresh '+str(p_value)+'  -bgfile '+bg_filename+' '+meme_motifs_filename 
         self.temp_directory=temp_directory
