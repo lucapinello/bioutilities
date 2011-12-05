@@ -10,7 +10,8 @@ import mmap
 import math
 import subprocess
 import numpy as np
-
+import tempfile
+import os
 #from Bio import SeqIO
 #from twobitreader import TwoBitFile
 
@@ -148,7 +149,7 @@ class Coordinate:
             
             for line in infile:
                 try:
-                    coord=line.split()
+                    coord=line.split('\t')
                     chr_id=coord[cl_chr_id]
                     bpstart=coord[cl_bpstart]
                     bpend=coord[cl_bpend]
@@ -352,6 +353,7 @@ class Genome:
         self.genome_directory=genome_directory
         self.release=release
         self.chr_len=dict()
+        self.verbose=verbose
         
         for infile in glob.glob( os.path.join(genome_directory, '*.fa') ):
             try:
@@ -375,28 +377,34 @@ class Genome:
             print 'Genome initializated'
             
     def estimate_background(self):
-        counting={'a':0,'c':0,'g':0,'t':0}
-
+        counting={'a':.0,'c':.0,'g':.0,'t':.0}
+        all=0.0
+        
         for chr_id in self.chr.keys():
-            if verbose:
+            if self.verbose:
                 print 'Counting on:',chr_id
             
-
             self.chr[chr_id].seek(0)
             self.chr[chr_id].readline()
             
             for line in self.chr[chr_id]:
                 for nt in counting.keys():
-                    counting[nt]+=line.lower().count(nt)
-        if verbose:
+                    count_nt=line.lower().count(nt)
+                    counting[nt]+=count_nt
+                    all+=count_nt
+        
+        if self.verbose:
             print counting
         
+        for nt in counting.keys():
+            counting[nt]/=all
+            
         return counting
 
     
     def extract_sequence(self,coordinate, line_length=50.0):
         if not self.chr.has_key(coordinate.chr_id):
-            if verbose:
+            if self.verbose:
                 print "Warning: chromosome %s not present in the genome" % coordinate.chr_id
         else:
 
@@ -417,7 +425,7 @@ class Genome:
             seq = seq.replace('\n','')
             
             if len(seq) < nbp: 
-                if verbose:
+                if self.verbose:
                     print 'Warning: coordinate out of range:',bpstart,bpend
             
             return seq[0:nbp].lower()            
@@ -430,7 +438,7 @@ class Genome_mm:
         self.genome_directory=genome_directory
         self.release=release        
         self.chr_len=dict()
-        
+        self.verbose=verbose
 
         for infile in glob.glob( os.path.join(genome_directory, '*.fa') ):
             mm_filename=infile.replace('.fa','.mm')
@@ -463,26 +471,37 @@ class Genome_mm:
     def extract_sequence(self,coordinate):
         return self.chr[coordinate.chr_id][coordinate.bpstart-1:coordinate.bpend].lower()
     
-    
-    def estimate_background(self):
-        counting={'a':0,'c':0,'g':0,'t':0}
 
+    def estimate_background(self):
+        counting={'a':.0,'c':.0,'g':.0,'t':.0}
+        all=0.0
         for chr_id in self.chr.keys():
-            if verbose:
+            if self.verbose:
                 print 'Counting on:',chr_id
-            counting[nt]+=self.chr[chr_id].lower().count(nt)
+
+            
+            for nt in counting.keys():
+                
+                count_nt=self.chr[chr_id][:].lower().count(nt)
+                counting[nt]+=count_nt
+                all+=count_nt
         
-        if verbose:
+        if self.verbose:
             print counting
+
+
+        for nt in counting.keys():
+            counting[nt]/=all
         
         return counting
+    
 
 
 class Fimo:
-    def __init__(self,meme_motifs_filename, bg_filename,p_value=1.e-5,temp_filename='tmp.fasta'):
+    def __init__(self,meme_motifs_filename, bg_filename,p_value=1.e-4,temp_directory=None):
 
-        self.fimo_command= 'fimo --text --output-pthresh '+str(p_value)+'  -bgfile '+bg_filename+' '+meme_motifs_filename+' '+str(temp_filename) 
-        self.temp_filename=temp_filename
+        self.fimo_command= 'fimo --text --output-pthresh '+str(p_value)+'  -bgfile '+bg_filename+' '+meme_motifs_filename 
+        self.temp_directory=temp_directory
         
         with open(meme_motifs_filename) as infile:
             self.motif_id_to_name=dict()
@@ -504,38 +523,45 @@ class Fimo:
             motifs_in_sequence=set()
         else:
             motifs_in_sequence=list()
+        
+        with tempfile.NamedTemporaryFile('w+',dir=self.temp_directory,delete=False) as tmp_file:
+            tmp_file.write(''.join(['>\n',seq,'\n']))
+            tmp_filename=tmp_file.name
+            tmp_file.close()
             
-        f_out=open(self.temp_filename,'w+')
-        f_out.write(''.join(['>\n',seq,'\n']))
-        f_out.close()
-
-        fimo_process=subprocess.Popen(self.fimo_command,stdin=None,stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
-        output=fimo_process.communicate()[0]
-        fimo_process.wait()
-
-        lines=output.split('\n')
-        lines=lines[1:]
-        for line in lines:
-            if line:
-                fields=line.split('\t')
-                motif_id=fields[0]
-                motif_name=self.motif_id_to_name[motif_id]
-
-                if not set_mode:
-                    c_start=float(fields[2])
-                    c_end=float(fields[3])
-                    strand=fields[4]
-                    score=float(fields[5])
-                    p_value=float(fields[6])
-                    
-                    
-                    motifs_in_sequence.append({'id':motif_id,'name':motif_name,'start':c_start,'end':c_end,'strand':strand,'score':score,'p_value':p_value})
-                else:
-                    motifs_in_sequence.add(self.motif_name_to_index[motif_name])
+            #print tmp_filename
+            #print self.fimo_command+' '+tmp_filename
+            
+            fimo_process=subprocess.Popen(self.fimo_command+' '+tmp_filename,stdin=None,stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
+            output=fimo_process.communicate()[0]
+            fimo_process.wait()
+            #print output
+            
+            os.remove(tmp_filename)
+            
+            lines=output.split('\n')
+            lines=lines[1:]
+            for line in lines:
+                if line:
+                    fields=line.split('\t')
+                    motif_id=fields[0]
+                    motif_name=self.motif_id_to_name[motif_id]
+    
+                    if not set_mode:
+                        c_start=float(fields[2])
+                        c_end=float(fields[3])
+                        strand=fields[4]
+                        score=float(fields[5])
+                        p_value=float(fields[6])
+                        
+                        
+                        motifs_in_sequence.append({'id':motif_id,'name':motif_name,'start':c_start,'end':c_end,'strand':strand,'score':score,'p_value':p_value})
+                    else:
+                        motifs_in_sequence.add(self.motif_name_to_index[motif_name])
                     
         return list(motifs_in_sequence)
 
-def build_motif_in_seq_matrix(bed_filename,genome_directory,meme_motifs_filename,bg_filename,genome_mm=True):
+def build_motif_in_seq_matrix(bed_filename,genome_directory,meme_motifs_filename,bg_filename,genome_mm=True,temp_directory=None):
 
     print 'Loading coordinates  from bed'
     target_coords=Coordinate.bed_to_coordinates(bed_filename)
@@ -547,7 +573,7 @@ def build_motif_in_seq_matrix(bed_filename,genome_directory,meme_motifs_filename
         genome=Genome(genome_directory)
 
     print 'Initilize Fimo and load motifs'
-    fimo=Fimo(meme_motifs_filename,bg_filename)
+    fimo=Fimo(meme_motifs_filename,bg_filename,temp_directory=temp_directory)
 
     print 'Initialize the matrix'
     motifs_in_sequences_matrix=np.zeros((len(target_coords),len(fimo.motif_names)))
