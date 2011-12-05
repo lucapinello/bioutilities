@@ -55,12 +55,15 @@ def read_sequence_from_fasta(fin, bpstart, bpend, line_length=50.0):
 
 class Coordinate:
     
-    def chr_id_only(self):
+    def chr_id2_ord(self):
         id=self.chr_id.replace('chr','')
         try:
-            '%02d' % int(id)
+            id=int(id)
         except:
-            pass
+            cs=0
+            for c in id:
+                cs+=ord(c)
+            id=cs
         
         return id
     
@@ -84,9 +87,9 @@ class Coordinate:
         return not self.__eq__(other)
     
     def __lt__(self, other):
-        if self.chr_id_only<other.chr_id_only:
+        if self.chr_id2_ord<other.chr_id2_ord:
             return True 
-        elif self.chr_id_only>other.chr_id_only:
+        elif self.chr_id2_ord>other.chr_id2_ord:
             return False
         elif  self.bpstart<other.bpstart:
             return True
@@ -279,7 +282,7 @@ class Coordinate:
 
 
     bpcenter=property(bpcenter)
-    chr_id_only=property(chr_id_only)
+    chr_id2_ord=property(chr_id2_ord)
 
 class Gene:
     
