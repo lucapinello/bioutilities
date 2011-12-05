@@ -54,6 +54,17 @@ def read_sequence_from_fasta(fin, bpstart, bpend, line_length=50.0):
 
 
 class Coordinate:
+    
+    def chr_id_only(self):
+        id=self.chr_id.replace('chr','')
+        try:
+            '%02d' % int(id)
+        except:
+            pass
+        
+        return id
+    
+    
     def __init__(self,chr_id,bpstart,bpend,name='ND',score=1.0,strand='ND'):
         self.chr_id=chr_id
         self.bpstart=bpstart
@@ -73,9 +84,9 @@ class Coordinate:
         return not self.__eq__(other)
     
     def __lt__(self, other):
-        if chr_id2int[self.chr_id]<chr_id2int[other.chr_id]:
+        if chr_id_only(self.chr_id)<chr_id_only(other.chr_id):
             return True 
-        elif chr_id2int[self.chr_id]>chr_id2int[other.chr_id]:
+        elif chr_id_only(self.chr_id)>chr_id_only(other.chr_id):
             return False
         elif  self.bpstart<other.bpstart:
             return True

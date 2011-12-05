@@ -84,9 +84,9 @@ class Coordinate:
         return not self.__eq__(other)
     
     def __lt__(self, other):
-        if chr_id_only(self.chr_id)<chr_id_only(other.chr_id):
+        if self.chr_id_only(self.chr_id)<self.chr_id_only(other.chr_id):
             return True 
-        elif chr_id_only(self.chr_id)>chr_id_only(other.chr_id):
+        elif self.chr_id_only(self.chr_id)>self.chr_id_only(other.chr_id):
             return False
         elif  self.bpstart<other.bpstart:
             return True
