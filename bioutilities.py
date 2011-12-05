@@ -84,9 +84,9 @@ class Coordinate:
         return not self.__eq__(other)
     
     def __lt__(self, other):
-        if self.chr_id_only(self.chr_id)<self.chr_id_only(other.chr_id):
+        if self.chr_id_only<other.chr_id_only:
             return True 
-        elif self.chr_id_only(self.chr_id)>self.chr_id_only(other.chr_id):
+        elif self.chr_id_only>other.chr_id_only:
             return False
         elif  self.bpstart<other.bpstart:
             return True
@@ -279,6 +279,7 @@ class Coordinate:
 
 
     bpcenter=property(bpcenter)
+    chr_id_only=property(chr_id_only)
 
 class Gene:
     
