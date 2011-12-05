@@ -262,9 +262,9 @@ class Coordinate:
                         intersection_matrix[row_index,cl_index]+=1
         
         if build_matrix:
-            return coords_in_common,intersection_indexes,intersection_matrix
+            return list(coords_in_common),list(intersection_indexes),intersection_matrix
         else:
-            return coords_in_common,intersection_indexes
+            return list(coords_in_common),list(intersection_indexes)
 
 
     bpcenter=property(bpcenter)

@@ -229,8 +229,8 @@ class Coordinate:
     @classmethod
     def calculate_intersection(cls,coords1,coords2,build_matrix=False):
     
-        coords_in_common=[]
-        intersection_indexes=[]
+        coords_in_common=set()
+        intersection_indexes=set()
         if build_matrix:
             intersection_matrix=sparse_matrix((len(coords1),len(coords2)))
         coord_to_row_index=dict()
@@ -254,9 +254,9 @@ class Coordinate:
                 #coords_in_common+=coords_hits
                 for coord_hit in coords_hits:
                     c_to_add=Coordinate.coordinates_from_interval(c.chr_id, coord_hit)
-                    coords_in_common.append(c_to_add)
+                    coords_in_common.add(c_to_add)
                     row_index=coord_to_row_index[c_to_add]
-                    intersection_indexes.append(row_index)
+                    intersection_indexes.add(row_index)
                     
                     if build_matrix:
                         intersection_matrix[row_index,cl_index]+=1
