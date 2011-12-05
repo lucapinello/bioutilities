@@ -12,6 +12,7 @@ import subprocess
 import numpy as np
 import tempfile
 import os
+from bx.intervals.intersection import Intersecter, Interval
 #from Bio import SeqIO
 #from twobitreader import TwoBitFile
 

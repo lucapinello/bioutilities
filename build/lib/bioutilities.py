@@ -225,6 +225,44 @@ class Coordinate:
                 seq=genome.extract_sequence(c)
                 out_file.write('>'+str(Coordinate(chr_id,bpstart,bpend,strand=strand))+'\n'+'\n'.join(chunks(seq,chars_per_line)))+'\n'
     
+    @classmethod
+    def calculate_intersection(cls,coords1,coords2,build_matrix=False):
+    
+        coords_in_common=[]
+        intersection_indexes=[]
+        if build_matrix:
+            intersection_matrix=sparse_matrix((len(coords1),len(coords2)))
+        coord_to_row_index=dict()
+        row_index=0 
+        interval_tree=dict()
+    
+        #Build the interval tree on the first set of coordinates
+        for c in coords1:
+            if c.chr_id not in interval_tree:
+                interval_tree[c.chr_id]=Intersecter()
+    
+            interval_tree[c.chr_id].add_interval(Interval(c.bpstart,c.bpend))
+            coord_to_row_index[c]=row_index
+            row_index+=1
+    
+        #Calculating the intersection
+        #for each coordinates on the second set check intersection and fill the matrix
+        for cl_index,c in enumerate(coords2):
+            coords_hits=interval_tree[c.chr_id].find(c.bpstart, c.bpend)
+            #coords_in_common+=coords_hits
+            for coord_hit in coords_hits:
+                c_to_add=Coordinate.coordinates_from_interval(c.chr_id, coord_hit)
+                coords_in_common.append(c_to_add)
+                row_index=coord_to_row_index[c_to_add]
+                intersection_indexes.append(row_index)
+                
+                if build_matrix:
+                    intersection_matrix[row_index,cl_index]+=1
+    
+        if build_matrix:
+            return coords_in_common,intersection_indexes,intersection_matrix
+        else:
+            return coords_in_common,intersection_indexes
 
 
     bpcenter=property(bpcenter)
