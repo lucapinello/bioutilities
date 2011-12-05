@@ -249,17 +249,18 @@ class Coordinate:
         #Calculating the intersection
         #for each coordinates on the second set check intersection and fill the matrix
         for cl_index,c in enumerate(coords2):
-            coords_hits=interval_tree[c.chr_id].find(c.bpstart, c.bpend)
-            #coords_in_common+=coords_hits
-            for coord_hit in coords_hits:
-                c_to_add=Coordinate.coordinates_from_interval(c.chr_id, coord_hit)
-                coords_in_common.append(c_to_add)
-                row_index=coord_to_row_index[c_to_add]
-                intersection_indexes.append(row_index)
-                
-                if build_matrix:
-                    intersection_matrix[row_index,cl_index]+=1
-    
+            if interval_tree.has_key(c.chr_id):
+                coords_hits=interval_tree[c.chr_id].find(c.bpstart, c.bpend)
+                #coords_in_common+=coords_hits
+                for coord_hit in coords_hits:
+                    c_to_add=Coordinate.coordinates_from_interval(c.chr_id, coord_hit)
+                    coords_in_common.append(c_to_add)
+                    row_index=coord_to_row_index[c_to_add]
+                    intersection_indexes.append(row_index)
+                    
+                    if build_matrix:
+                        intersection_matrix[row_index,cl_index]+=1
+        
         if build_matrix:
             return coords_in_common,intersection_indexes,intersection_matrix
         else:
