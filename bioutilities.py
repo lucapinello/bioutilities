@@ -635,7 +635,7 @@ class Fimo:
                     
         return list(motifs_in_sequence)
 
-def build_motif_in_seq_matrix(bed_filename,genome_directory,meme_motifs_filename,bg_filename,genome_mm=True,temp_directory=None):
+def build_motif_in_seq_matrix(bed_filename,genome_directory,meme_motifs_filename,bg_filename,genome_mm=True,temp_directory=None,mask_repetitive=False):
 
     print 'Loading coordinates  from bed'
     target_coords=Coordinate.bed_to_coordinates(bed_filename)
@@ -653,7 +653,7 @@ def build_motif_in_seq_matrix(bed_filename,genome_directory,meme_motifs_filename
     motifs_in_sequences_matrix=np.zeros((len(target_coords),len(fimo.motif_names)))
 
     for idx_seq,c in enumerate(target_coords):
-        seq=genome.extract_sequence(c)
+        seq=genome.extract_sequence(c,mask_repetitive)
         print idx_seq, len(target_coords)
         motifs_in_sequences_matrix[idx_seq,fimo.extract_motifs(seq,set_mode=True)]=1
 
