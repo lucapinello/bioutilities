@@ -528,9 +528,9 @@ class Genome_mm:
         
     def extract_sequence(self,coordinate,mask_repetitive=False):
         if mask_repetitive:
-            return self.chr[coordinate.chr_id][coordinate.bpstart-1:coordinate.bpend].lower()
+            return ''.join([mask(c) for c in self.chr[coordinate.chr_id][coordinate.bpstart-1:coordinate.bpend]]).lower()
         else:
-            return ''.join([mask(c) for c in self.chr[coordinate.chr_id][coordinate.bpstart-1:coordinate.bpend]])
+            return self.chr[coordinate.chr_id][coordinate.bpstart-1:coordinate.bpend].lower()
     
 
     def estimate_background(self):
