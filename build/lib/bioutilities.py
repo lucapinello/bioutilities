@@ -33,7 +33,7 @@ class constant_n_dict (dict):
 
 nt2int=constant_minus_one_dict({'a':0,'c':1,'g':2,'t':3})      
 int2nt=constant_n_dict({0:'a',1:'c',2:'g',3:'t'})
-nt_complement=dict({'a':'t','c':'g','g':'c','t':'a'})
+nt_complement=dict({'a':'t','c':'g','g':'c','t':'a','n':'n'})
 
 def read_sequence_from_fasta(fin, bpstart, bpend, line_length=50.0):
     bpstart=bpstart-1
@@ -528,9 +528,14 @@ class Genome_mm:
         
     def extract_sequence(self,coordinate,mask_repetitive=False):
         if mask_repetitive:
-            return self.chr[coordinate.chr_id][coordinate.bpstart-1:coordinate.bpend].lower()
+            seq= ''.join([mask(c) for c in self.chr[coordinate.chr_id][coordinate.bpstart-1:coordinate.bpend]]).lower()
         else:
-            return ''.join([mask(c) for c in self.chr[coordinate.chr_id][coordinate.bpstart-1:coordinate.bpend]])
+            seq= self.chr[coordinate.chr_id][coordinate.bpstart-1:coordinate.bpend].lower()
+        
+        if coordinate.strand=='-':
+            return Sequence.reverse_complement(seq)
+        else:
+            return seq
     
 
     def estimate_background(self):

@@ -33,7 +33,7 @@ class constant_n_dict (dict):
 
 nt2int=constant_minus_one_dict({'a':0,'c':1,'g':2,'t':3})      
 int2nt=constant_n_dict({0:'a',1:'c',2:'g',3:'t'})
-nt_complement=dict({'a':'t','c':'g','g':'c','t':'a'})
+nt_complement=dict({'a':'t','c':'g','g':'c','t':'a','n':'n'})
 
 def read_sequence_from_fasta(fin, bpstart, bpend, line_length=50.0):
     bpstart=bpstart-1
@@ -237,10 +237,10 @@ class Coordinate:
         return Coordinate(chr_id, interval.start,interval.end,)
     
     @classmethod
-    def coordinates_to_fasta(cls,coordinates,fasta_file,genome,chars_per_line=50):
+    def coordinates_to_fasta(cls,coordinates,fasta_file,genome,chars_per_line=50,mask_repetitive=False):
         with open(fasta_file,'w+') as outfile:
             for c in coordinates:
-                seq=genome.extract_sequence(c)
+                seq=genome.extract_sequence(c,mask_repetitive)
                 out_file.write('>'+str(Coordinate(chr_id,bpstart,bpend,strand=strand))+'\n'+'\n'.join(chunks(seq,chars_per_line)))+'\n'
     
     @classmethod
@@ -460,7 +460,7 @@ class Genome:
         return counting
 
     
-    def extract_sequence(self,coordinate, line_length=50.0):
+    def extract_sequence(self,coordinate, mask_repetitive=False,line_length=50.0):
         if not self.chr.has_key(coordinate.chr_id):
             if self.verbose:
                 print "Warning: chromosome %s not present in the genome" % coordinate.chr_id
@@ -486,7 +486,15 @@ class Genome:
                 if self.verbose:
                     print 'Warning: coordinate out of range:',bpstart,bpend
             
-            return seq[0:nbp].lower()            
+            if mask_repetitive:
+                seq=  ''.join([mask(c) for c in  seq[0:nbp]]).lower()
+            else:
+                seq=seq[0:nbp].lower()
+            
+            if coordinate.strand=='-':
+                return Sequence.reverse_complement(seq)
+            else:
+                return seq        
             
 
 class Genome_mm:
@@ -528,9 +536,14 @@ class Genome_mm:
         
     def extract_sequence(self,coordinate,mask_repetitive=False):
         if mask_repetitive:
-            return ''.join([mask(c) for c in self.chr[coordinate.chr_id][coordinate.bpstart-1:coordinate.bpend]]).lower()
+            seq= ''.join([mask(c) for c in self.chr[coordinate.chr_id][coordinate.bpstart-1:coordinate.bpend]]).lower()
         else:
-            return self.chr[coordinate.chr_id][coordinate.bpstart-1:coordinate.bpend].lower()
+            seq= self.chr[coordinate.chr_id][coordinate.bpstart-1:coordinate.bpend].lower()
+        
+        if coordinate.strand=='-':
+            return Sequence.reverse_complement(seq)
+        else:
+            return seq
     
 
     def estimate_background(self):
