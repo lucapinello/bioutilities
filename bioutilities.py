@@ -17,6 +17,9 @@ from bx.intervals.intersection import Intersecter, Interval
 #from twobitreader import TwoBitFile
 
 
+mask=lambda c: c if c.isupper() else 'N' 
+
+
 def chunks(l, n):
  return [l[i:i+n] for i in range(0, len(l), n)]
 
@@ -523,8 +526,11 @@ class Genome_mm:
             print 'Genome initializated'
         
         
-    def extract_sequence(self,coordinate):
-        return self.chr[coordinate.chr_id][coordinate.bpstart-1:coordinate.bpend].lower()
+    def extract_sequence(self,coordinate,mask_repetitive=False):
+        if mask_repetitive:
+            return self.chr[coordinate.chr_id][coordinate.bpstart-1:coordinate.bpend].lower()
+        else:
+            return ''.join([mask(c) for c in self.chr[coordinate.chr_id][coordinate.bpstart-1:coordinate.bpend]])
     
 
     def estimate_background(self):
@@ -669,6 +675,8 @@ def extract_bg_from_bed(bed_filename,genome_directory,bg_filename,genome_mm=True
     with open(bg_filename, 'w+') as out_file:
         for nt in ['a','c','t','g']:
             out_file.write('%s\t%1.4f\n' % (nt,acgt_fq[nt]))
+
+
 
 
 ''' OLD STUFF
