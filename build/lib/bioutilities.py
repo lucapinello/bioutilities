@@ -237,10 +237,10 @@ class Coordinate:
         return Coordinate(chr_id, interval.start,interval.end,)
     
     @classmethod
-    def coordinates_to_fasta(cls,coordinates,fasta_file,genome,chars_per_line=50):
+    def coordinates_to_fasta(cls,coordinates,fasta_file,genome,chars_per_line=50,mask_repetitive=False):
         with open(fasta_file,'w+') as outfile:
             for c in coordinates:
-                seq=genome.extract_sequence(c)
+                seq=genome.extract_sequence(c,mask_repetitive)
                 out_file.write('>'+str(Coordinate(chr_id,bpstart,bpend,strand=strand))+'\n'+'\n'.join(chunks(seq,chars_per_line)))+'\n'
     
     @classmethod
@@ -460,7 +460,7 @@ class Genome:
         return counting
 
     
-    def extract_sequence(self,coordinate, line_length=50.0):
+    def extract_sequence(self,coordinate, mask_repetitive=False,line_length=50.0):
         if not self.chr.has_key(coordinate.chr_id):
             if self.verbose:
                 print "Warning: chromosome %s not present in the genome" % coordinate.chr_id
@@ -486,7 +486,15 @@ class Genome:
                 if self.verbose:
                     print 'Warning: coordinate out of range:',bpstart,bpend
             
-            return seq[0:nbp].lower()            
+            if mask_repetitive:
+                seq=  ''.join([mask(c) for c in  seq[0:nbp]]).lower()
+            else:
+                seq=seq[0:nbp].lower()
+            
+            if coordinate.strand=='-':
+                return Sequence.reverse_complement(seq)
+            else:
+                return seq        
             
 
 class Genome_mm:
@@ -627,7 +635,7 @@ class Fimo:
                     
         return list(motifs_in_sequence)
 
-def build_motif_in_seq_matrix(bed_filename,genome_directory,meme_motifs_filename,bg_filename,genome_mm=True,temp_directory=None):
+def build_motif_in_seq_matrix(bed_filename,genome_directory,meme_motifs_filename,bg_filename,genome_mm=True,temp_directory=None,mask_repetitive=False):
 
     print 'Loading coordinates  from bed'
     target_coords=Coordinate.bed_to_coordinates(bed_filename)
@@ -645,7 +653,7 @@ def build_motif_in_seq_matrix(bed_filename,genome_directory,meme_motifs_filename
     motifs_in_sequences_matrix=np.zeros((len(target_coords),len(fimo.motif_names)))
 
     for idx_seq,c in enumerate(target_coords):
-        seq=genome.extract_sequence(c)
+        seq=genome.extract_sequence(c,mask_repetitive)
         print idx_seq, len(target_coords)
         motifs_in_sequences_matrix[idx_seq,fimo.extract_motifs(seq,set_mode=True)]=1
 
