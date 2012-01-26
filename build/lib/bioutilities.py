@@ -308,6 +308,12 @@ class Gene:
             return self.c.bpend
         else:
             return self.c.bpstart
+
+    def tes(self):
+        if self.c.strand=='+':
+            return self.c.bpend
+        else:
+            return self.c.bpstart
     
     def end(self):
         if self.c.strand=='+':
