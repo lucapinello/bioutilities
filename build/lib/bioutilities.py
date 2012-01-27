@@ -590,12 +590,15 @@ class Fimo:
             self.motif_ids=[]
             motif_index=0
             for line in infile:
-                if 'MOTIF' in line:
-                    self.motif_id_to_name[line.split()[1]]=line.split()[2]
-                    self.motif_name_to_index[line.split()[2]]=motif_index
-                    self.motif_ids.append(line.split()[1])
-                    self.motif_names.append(line.split()[2])
-                    motif_index+=1
+                try:
+                    if 'MOTIF' in line:
+                        self.motif_id_to_name[line.split()[1]]=line.split()[2]
+                        self.motif_name_to_index[line.split()[2]]=motif_index
+                        self.motif_ids.append(line.split()[1])
+                        self.motif_names.append(line.split()[2])
+                        motif_index+=1
+                except:
+                    print 'problem with this line:', line
 
         
     def extract_motifs(self,seq, set_mode=False):
@@ -686,6 +689,7 @@ def extract_bg_from_bed(bed_filename,genome_directory,bg_filename,genome_mm=True
             acgt_fq[nt]+=seq.count(nt)
             total+=acgt_fq[nt]
 
+    print acgt_fq, total
     for nt in ['a','c','t','g']:
         acgt_fq[nt]/=total
 
