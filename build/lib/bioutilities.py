@@ -687,9 +687,10 @@ def extract_bg_from_bed(bed_filename,genome_directory,bg_filename,genome_mm=True
         seq=genome.extract_sequence(c)
         for nt in ['a','c','t','g']:
             acgt_fq[nt]+=seq.count(nt)
-            total+=acgt_fq[nt]
+        
+    total=sum(acgt_fq.values())
 
-    print acgt_fq, total
+    
     for nt in ['a','c','t','g']:
         acgt_fq[nt]/=total
 
