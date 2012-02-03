@@ -360,7 +360,7 @@ class Gene:
                 strand=fields[3]
                 access=fields[1]
                 name=fields[-4]
-                c=Coordinate(chr,bpstart,bpend,strand=strand)
+                c=Coordinate(chr_id,bpstart,bpend,strand=strand)
 
                 if load_exons_introns_info:
                     exon_starts=map(int,fields[9].split(',')[:-1])
