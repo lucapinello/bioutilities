@@ -122,6 +122,13 @@ class Coordinate:
     def __len__(self):
         return self.bpend-self.bpstart+1
     
+    def __and__(self,other):
+        if self.bpend < other.bpstart or other.bpend < self.bpstart or self.chr_id != other.chr_id:
+            return None
+        else:
+            return Coordinate(max(self.bpstart,other.bpstart),min(self.bpend,other.bpend))
+ 
+    
     
     @classmethod
     def read_coordinates_from_xls(cls,filename, chr_id_cl, bpstart_cl, bp_end_cl,name_cl=None,score_cl=None, strand_cl=None,header_lines=1):
@@ -360,7 +367,7 @@ class Gene:
                 strand=fields[3]
                 access=fields[1]
                 name=fields[-4]
-                c=Coordinate(chr,bpstart,bpend,strand=strand)
+                c=Coordinate(chr_id,bpstart,bpend,strand=strand)
 
                 if load_exons_introns_info:
                     exon_starts=map(int,fields[9].split(',')[:-1])

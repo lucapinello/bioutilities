@@ -122,6 +122,13 @@ class Coordinate:
     def __len__(self):
         return self.bpend-self.bpstart+1
     
+    def __and__(self,other):
+        if self.bpend < other.bpstart or other.bpend < self.bpstart or self.chr_id != other.chr_id:
+            return None
+        else:
+            return Coordinate(self.chr_id,max(self.bpstart,other.bpstart),min(self.bpend,other.bpend))
+ 
+    
     
     @classmethod
     def read_coordinates_from_xls(cls,filename, chr_id_cl, bpstart_cl, bp_end_cl,name_cl=None,score_cl=None, strand_cl=None,header_lines=1):
