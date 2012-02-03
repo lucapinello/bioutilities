@@ -127,8 +127,6 @@ class Coordinate:
             return None
         else:
             return Coordinate(self.chr_id,max(self.bpstart,other.bpstart),min(self.bpend,other.bpend))
- 
-    
     
     @classmethod
     def read_coordinates_from_xls(cls,filename, chr_id_cl, bpstart_cl, bp_end_cl,name_cl=None,score_cl=None, strand_cl=None,header_lines=1):

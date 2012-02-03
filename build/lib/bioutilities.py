@@ -126,7 +126,8 @@ class Coordinate:
         if self.bpend < other.bpstart or other.bpend < self.bpstart or self.chr_id != other.chr_id:
             return None
         else:
-            return Coordinate(max(self.bpstart,other.bpstart),min(self.bpend,other.bpend))
+            return Coordinate(self.chr_id,max(self.bpstart,other.bpstart),min(self.bpend,other.bpend))
+
  
     
     
