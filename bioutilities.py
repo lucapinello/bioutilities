@@ -353,10 +353,13 @@ class Gene:
             return Coordinate(self.c.chr_id,self.end-self.regions[3],self.tss+self.regions[0],strand='-') 
         
     @classmethod    
-    def load_from_annotation(cls,gene_annotation_file,load_exons_introns_info=False):
+    def load_from_annotation(cls,gene_annotation_file,load_exons_introns_info=False,header_lines=1):
         genes_list=[]
         with open(gene_annotation_file,'r') as genes_file:
             
+            for _ in range(header_lines):
+                genes_file.readline()
+           
             for gene_line in genes_file:
                 fields=gene_line.split('\t')
                 chr_id=fields[2]
@@ -380,10 +383,14 @@ class Gene:
         return genes_list
 
     @classmethod
-    def exons_from_annotations(cls,gene_annotation_file):
+    def exons_from_annotations(cls,gene_annotation_file,header_lines=1):
         exons_list=[]
 
         with open(gene_annotation_file,'r') as genes_file:
+
+            for _ in range(header_lines):
+                genes_file.readline()            
+            
             for gene_line in genes_file:
                 fields=gene_line.split('\t')
                 chr_id=fields[2]
@@ -398,10 +405,14 @@ class Gene:
 
         
     @classmethod
-    def introns_from_annotations(cls,gene_annotation_file):
+    def introns_from_annotations(cls,gene_annotation_file,header_lines=1):
         introns_list=[]
 
         with open(gene_annotation_file,'r') as genes_file:
+            
+            for _ in range(header_lines):
+                genes_file.readline()            
+            
             for gene_line in genes_file:
                 fields=gene_line.split('\t')
                 chr_id=fields[2]
@@ -416,9 +427,12 @@ class Gene:
 
 
     @classmethod
-    def genes_coordinates_from_annotations(cls,gene_annotation_file):
+    def genes_coordinates_from_annotations(cls,gene_annotation_file,header_lines=1):
         genes_coordinates=[]
         with open(gene_annotation_file,'r') as genes_file:
+            
+            for _ in range(header_lines):
+                genes_file.readline()            
             
             for gene_line in genes_file:
                 fields=gene_line.split('\t')
