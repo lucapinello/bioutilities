@@ -1,0 +1,2 @@
+Elimina tutte le righr cche contengono una parola
+cat H3K27ME3_ALL_cells.txt | grep -Ev 'chrX' > H3K27ME3_ALL_cells_without_chrX.txt
