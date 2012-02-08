@@ -227,10 +227,13 @@ class Coordinate:
             return coordinates
     
     @classmethod
-    def coordinates_to_bed(cls,coordinates,bed_file):
+    def coordinates_to_bed(cls,coordinates,bed_file,minimal_format=False):
         with open(bed_file,'w+') as outfile:
             for c in coordinates:
-                outfile.write('%s\t%d\t%d\t%s\t%f\t%s\n' %(c.chr_id,c.bpstart,c.bpend,c.name,c.score,c.strand) )
+                if minimal_format:
+                    outfile.write('%s\t%d\t%d\n' %(c.chr_id,c.bpstart,c.bpend) )
+                else:
+                    outfile.write('%s\t%d\t%d\t%s\t%f\t%s\n' %(c.chr_id,c.bpstart,c.bpend,c.name,c.score,c.strand) )
     @classmethod
     def coordinates_to_nscore_format(cls,coordinates,bed_file):
         with open(bed_file,'w+') as outfile:
