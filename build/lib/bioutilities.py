@@ -127,9 +127,6 @@ class Coordinate:
             return None
         else:
             return Coordinate(self.chr_id,max(self.bpstart,other.bpstart),min(self.bpend,other.bpend))
-
- 
-    
     
     @classmethod
     def read_coordinates_from_xls(cls,filename, chr_id_cl, bpstart_cl, bp_end_cl,name_cl=None,score_cl=None, strand_cl=None,header_lines=1):
@@ -776,6 +773,25 @@ def extract_bg_from_bed(bed_filename,genome_directory,bg_filename,genome_mm=True
         for nt in ['a','c','t','g']:
             out_file.write('%s\t%1.4f\n' % (nt,acgt_fq[nt]))
 
+
+#hgWiggle wrapper
+def read_from_wig(c,wig_path,wig_mask='.phastCons44way.hg18.compiled',only_average=False):
+    position=c.chr_id+':'+str(c.bpstart)+'-'+str(c.bpend)
+    wig_file=os.path.join(wig_path,c.chr_id+wig_mask)
+
+    if only_average:
+        command=' '.join(['hgWiggle','-position='+position,wig_file,"-doStats | sed  -e '1,3d' | cut -f4,10"])
+    else:
+        command=' '.join(['hgWiggle','-position='+position,wig_file," -rawDataOut "])
+
+    wig_process=subprocess.Popen(command,stdin=None,stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
+    output=wig_process.communicate()[0]
+
+    if only_average:    
+        return tuple(output.split())
+    else:
+        values=output.split()
+        return len(values),values
 
 
 
