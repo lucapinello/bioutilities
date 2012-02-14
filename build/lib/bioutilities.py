@@ -295,6 +295,13 @@ class Coordinate:
     bpcenter=property(bpcenter)
     chr_id2_ord=property(chr_id2_ord)
 
+
+    @classmethod
+    def coordinates_of_intervals_around_center(cls,coords,window_size):
+        half_window=window_size/2
+        return [Coordinate(c.chr_id,c.bpcenter-half_window,c.bpcenter+half_window,strand=c.strand,name=c.name,score=c.score) for c in coords]
+
+
 class Gene:
     
     regions=[8000,2000,1000,1000]
