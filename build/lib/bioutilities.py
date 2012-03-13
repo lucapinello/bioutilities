@@ -71,7 +71,7 @@ class Coordinate:
         return id
     
     
-    def __init__(self,chr_id,bpstart,bpend,name='ND',score=1.0,strand='ND'):
+    def __init__(self,chr_id,bpstart,bpend,name=None,score=None,strand=None):
         self.chr_id=chr_id
         self.bpstart=bpstart
         self.bpend=bpend
@@ -114,10 +114,10 @@ class Coordinate:
         return hash((self.chr_id,self.bpstart,self.bpend))
 
     def __str__(self):
-        return self.chr_id+'_'+str(self.bpstart)+'_'+str(self.bpend)+'_'+self.name+'_'+str(self.score)+'_'+self.strand
+        return self.chr_id+':'+str(self.bpstart)+'-'+str(self.bpend)+ (' '+self.name if self.name else '')  + ( ' '+  str(self.score) if self.score else '')+ (' '+self.strand if self.strand else '')
     
     def __repr__(self):
-        return self.chr_id+'_'+str(self.bpstart)+'_'+str(self.bpend)+'_'+self.name+'_'+str(self.score)+'_'+self.strand
+        return self.chr_id+':'+str(self.bpstart)+'-'+str(self.bpend)+ (' '+self.name if self.name else '')  + ( ' '+  str(self.score) if self.score else '')+ (' '+self.strand if self.strand else '')
     
     def __len__(self):
         return self.bpend-self.bpstart+1
@@ -363,7 +363,7 @@ class Gene:
             return Coordinate(self.c.chr_id,self.end-self.regions[3],self.tss+self.regions[0],strand='-') 
         
     @classmethod    
-    def load_from_annotation(cls,gene_annotation_file,load_exons_introns_info=False,header_lines=1):
+    def load_from_annotation(cls,gene_annotation_file,load_exons_introns_info=False,header_lines=1,regions=[8000,2000,1000,1000]):
         genes_list=[]
         with open(gene_annotation_file,'r') as genes_file:
             
@@ -386,9 +386,9 @@ class Gene:
 
                     exons=[Coordinate(chr_id,bpstart,bpend,strand=strand) for bpstart,bpend in zip(exon_starts,exon_ends)]
                     introns=[Coordinate(chr_id,bpstart+1,bpend-1,strand=strand) for bpstart,bpend in zip(exon_ends[:-1],exon_starts[1:])]
-                    genes_list.append(Gene(access,name,c,exons=exons,introns=introns))
+                    genes_list.append(Gene(access,name,c,exons=exons,introns=introns,regions=regions))
                 else:
-                    genes_list.append(Gene(access,name,c))
+                    genes_list.append(Gene(access,name,c,regions=regions))
                 
         return genes_list
 
@@ -458,9 +458,15 @@ class Gene:
 
             return genes_coordinates
     
+    
+    @classmethod
+    def promoter_coordinates_from_annotations(cls,gene_annotation_file,load_exons_introns_info=False,header_lines=1,promoter_region=[2000,1000]):
+        return [g.promoter_c for g in cls.load_from_annotation(gene_annotation_file,load_exons_introns_info=False,header_lines=1,regions=[Gene.regions[0],promoter_region[0],promoter_region[1],Gene.regions[3]])]
+    
+  
        
     tss=property(tss)
-    end=property(end)
+    tes=property(tes)
     distal_c=property(distal_c)
     promoter_c=property(promoter_c)
     intra_c=property(intra_c)
