@@ -305,7 +305,7 @@ class Coordinate:
 
 class Gene:
     
-    regions=[8000,2000,1000,1000]
+    regions=[8000,2000,0,1000]
     
     def __init__(self,access,name,coordinate,regions=None,exons=None,introns=None,):
         self.access=access
@@ -319,6 +319,9 @@ class Gene:
     
     
     def __str__(self):
+        return self.name+'_'+self.access+'_'+str(self.c)
+    
+    def __repr__(self):
         return self.name+'_'+self.access+'_'+str(self.c)
     
     def tss(self):
@@ -364,7 +367,7 @@ class Gene:
             return Coordinate(self.c.chr_id,self.end-self.regions[3],self.tss+self.regions[0],strand='-') 
         
     @classmethod    
-    def load_from_annotation(cls,gene_annotation_file,load_exons_introns_info=False,header_lines=1,regions=[8000,2000,1000,1000]):
+    def load_from_annotation(cls,gene_annotation_file,load_exons_introns_info=False,header_lines=1,regions=regions):
         genes_list=[]
         with open(gene_annotation_file,'r') as genes_file:
             
@@ -461,10 +464,28 @@ class Gene:
     
     
     @classmethod
-    def promoter_coordinates_from_annotations(cls,gene_annotation_file,load_exons_introns_info=False,header_lines=1,promoter_region=[2000,1000]):
-        return [g.promoter_c for g in cls.load_from_annotation(gene_annotation_file,load_exons_introns_info=False,header_lines=1,regions=[Gene.regions[0],promoter_region[0],promoter_region[1],Gene.regions[3]])]
+    def promoter_coordinates_from_annotations(cls,gene_annotation_file,load_exons_introns_info=False,header_lines=1,promoter_region=None):
+        if promoter_region:
+            return [g.promoter_c for g in cls.load_from_annotation(gene_annotation_file,load_exons_introns_info=False,header_lines=1,regions=[Gene.regions[0],promoter_region[0],promoter_region[1],Gene.regions[3]])]
+        else:
+             return [g.promoter_c for g in cls.load_from_annotation(gene_annotation_file,load_exons_introns_info=False,header_lines=1)]
+            
     
-  
+    @classmethod
+    def write_genomic_regions_bed(cls,gene_annotation_file,genome_name='',minimal_format=True, promoter_region=None):
+        
+        exons=Gene.exons_from_annotations(gene_annotation_file)
+        Coordinate.coordinates_to_bed(exons,genome_name+'exons.bed',minimal_format=minimal_format)
+        del(exons)
+        
+        introns=Gene.introns_from_annotations(gene_annotation_file)
+        Coordinate.coordinates_to_bed(introns,genome_name+'introns.bed',minimal_format=minimal_format)
+        del(introns)
+
+        promoters=Gene.promoter_coordinates_from_annotations(gene_annotation_file,promoter_region)
+        Coordinate.coordinates_to_bed(promoters,genome_name+'promoters.bed',minimal_format=True)
+        del(promoters)
+ 
        
     tss=property(tss)
     tes=property(tes)
