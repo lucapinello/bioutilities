@@ -882,7 +882,7 @@ class Annotator:
         savemat(filename,{'annotation_track':self.annotation_track,'mapping':self.annotation_names_to_prime})
         print 'Annotation track saved to:',filename
 
-    def save_annotation_track_text(self,filename):
+    def save_annotation_track_bed(self,filename):
         with open(filename,'w+') as outfile:
 
             for idx,c in enumerate(self.input_coordinates):
