@@ -6,6 +6,7 @@ Created on May 3, 2011
 import os, glob, string
 import xlrd
 from scipy.stats import rv_discrete
+from scipy.io.matlab import savemat
 import mmap
 import math
 import subprocess
@@ -823,7 +824,6 @@ def read_from_wig(c,wig_path,wig_mask='.phastCons44way.hg18.compiled',only_avera
         values=output.split()
         return len(values),values
 
-
 class Annotator:
     
     def __init__(self,input_filename,annotations_filenames,annotation_names=None):
@@ -847,7 +847,6 @@ class Annotator:
 
         self.input_coordinates=Coordinate.bed_to_coordinates(input_filename)
 
-
     def annotate(self):
         #allocate_memory
         self.annotation_track=np.ones(len(self.input_coordinates),dtype=np.int)
@@ -865,7 +864,6 @@ class Annotator:
             self.coord_to_row_index[c]=self.row_index
             self.row_index+=1
 
-
         for idx,bed_filename in enumerate(self.annotations_filenames):
             coordinates=Coordinate.bed_to_coordinates(bed_filename)
 
@@ -879,7 +877,6 @@ class Annotator:
         else:
             prime_number=self.annotation_names_to_prime[annotation_name]
             return [self.input_coordinates[idx] for idx,value in enumerate(self.annotation_track) if (value % prime_number)==0]
-
 
     def save_annotation_track_matlab(self,filename):
         savemat(filename,{'annotation_track':self.annotation_track,'mapping':self.annotation_names_to_prime})
@@ -903,7 +900,6 @@ class Annotator:
         savemat(filename,{'annotation_track':self.annotation_track,'mapping':self.annotation_names_to_prime})
         print 'Annotation track saved to:',filename
     
-
     def __intersection_indexes(self,coordinates):
         intersection_indexes=set()
 
@@ -915,7 +911,6 @@ class Annotator:
                     intersection_indexes.add(self.coord_to_row_index[Coordinate.coordinates_from_interval(c.chr_id, coord_hit)])
 
         return intersection_indexes
-        
 
     def __gen_primes(self):
 
@@ -933,8 +928,6 @@ class Annotator:
                 del D[q]
 
             q += 1
-
-
 
     def __primes(self,n):
         primes=self.__gen_primes()
