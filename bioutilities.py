@@ -128,6 +128,12 @@ class Coordinate:
             return None
         else:
             return Coordinate(self.chr_id,max(self.bpstart,other.bpstart),min(self.bpend,other.bpend))
+
+    def upstream(self,offset=2000):
+            return Coordinate(self.chr_id,self.bpend+1,self.bpend+offset)
+    
+    def downstream(self,offset=2000):
+        return Coordinate(self.chr_id,max(0,self.bpstart-offset),self.bpstart-1)
     
     @classmethod
     def read_coordinates_from_xls(cls,filename, chr_id_cl, bpstart_cl, bp_end_cl,name_cl=None,score_cl=None, strand_cl=None,header_lines=1):
