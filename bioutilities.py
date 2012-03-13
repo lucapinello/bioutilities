@@ -918,7 +918,6 @@ class Annotator:
                 line=line[:-1]
                 outfile.write(line+'\n')
 
-        savemat(filename,{'annotation_track':self.annotation_track,'mapping':self.annotation_names_to_prime})
         print 'Annotation track saved to:',filename
     
     def __intersection_indexes(self,coordinates):
