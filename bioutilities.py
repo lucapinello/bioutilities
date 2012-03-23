@@ -256,7 +256,7 @@ class Coordinate:
         with open(fasta_file,'w+') as outfile:
             for c in coordinates:
                 seq=genome.extract_sequence(c,mask_repetitive)
-                outfile.write('>'+str(Coordinate(chr_id,bpstart,bpend,strand=strand))+'\n'+'\n'.join(chunks(seq,chars_per_line)))+'\n'
+                outfile.write('>'+str(Coordinate(c.chr_id,c.bpstart,c.bpend,strand=c.strand))+'\n'+'\n'.join(chunks(seq,chars_per_line)))+'\n'
     
     @classmethod
     def calculate_intersection(cls,coords1,coords2,build_matrix=False):
