@@ -739,7 +739,7 @@ class Fimo:
             motifs_in_sequence=list()
         
         with tempfile.NamedTemporaryFile('w+',dir=self.temp_directory,delete=False) as tmp_file:
-            tmp_file.write(''.join(['>\n',seq,'\n']))
+            tmp_file.write(''.join(['>S\n',seq,'\n']))
             tmp_filename=tmp_file.name
             tmp_file.close()
             
