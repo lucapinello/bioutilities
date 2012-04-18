@@ -822,7 +822,7 @@ def build_motif_profile(target_coords,genome,meme_motifs_filename,bg_filename,ge
         motifs=fimo.extract_motifs(seq,report_mode='fq_array')
         motifs_in_sequences_profile+=motifs
 
-    return motifs_in_sequences_matrix, fimo.motif_names
+    return motifs_in_sequences_profile, fimo.motif_names
 
 
 

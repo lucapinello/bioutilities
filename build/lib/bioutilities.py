@@ -709,7 +709,7 @@ class Genome_mm:
 
 
 class Fimo:
-    def __init__(self,meme_motifs_filename, bg_filename,p_value=1.e-4,temp_directory=None):
+    def __init__(self,meme_motifs_filename, bg_filename,p_value=1.e-4,temp_directory='./'):
 
         self.fimo_command= 'fimo --text --output-pthresh '+str(p_value)+'  -bgfile '+bg_filename+' '+meme_motifs_filename 
         self.temp_directory=temp_directory
@@ -737,8 +737,11 @@ class Fimo:
                 motifs_in_sequence=set()
         elif report_mode=='fq_array':
             motifs_in_sequence=np.zeros(len(self.motif_names))
-        else:
+        elif report_mode=='full':
             motifs_in_sequence=list()
+        else:
+            raise Exception('report_mode not recognized')
+            
         
         with tempfile.NamedTemporaryFile('w+',dir=self.temp_directory,delete=False) as tmp_file:
             tmp_file.write(''.join(['>S\n',seq,'\n']))
@@ -774,12 +777,11 @@ class Fimo:
                     elif report_mode=='fq_array':
                         motifs_in_sequence[self.motif_name_to_index[motif_name]]+=1
                     
-                    else:
-                        raise Exception('report_mode not recognized')
+                   
 
             return motifs_in_sequence if report_mode=='fq_array' else list(motifs_in_sequence)
 
-def build_motif_in_seq_matrix(bed_filename,genome_directory,meme_motifs_filename,bg_filename,genome_mm=True,temp_directory=None,mask_repetitive=False,p_value=1.e-4):
+def build_motif_in_seq_matrix(bed_filename,genome_directory,meme_motifs_filename,bg_filename,genome_mm=True,temp_directory='./',mask_repetitive=False,p_value=1.e-4):
 
     print 'Loading coordinates  from bed'
     target_coords=Coordinate.bed_to_coordinates(bed_filename)
@@ -805,13 +807,13 @@ def build_motif_in_seq_matrix(bed_filename,genome_directory,meme_motifs_filename
 
 
 
-def build_motif_in_seq_profile(target_coords,genome,meme_motifs_filename,bg_filename,genome_mm=True,temp_directory=None,mask_repetitive=False):
+def build_motif_profile(target_coords,genome,meme_motifs_filename,bg_filename,genome_mm=True,temp_directory='./',mask_repetitive=False,p_value=1.e-4):
 
 
-    print 'Initilize Fimo and load motifs'
+    #print 'Initilize Fimo and load motifs'
     fimo=Fimo(meme_motifs_filename,bg_filename,temp_directory=temp_directory,p_value=p_value)
 
-    print 'Allocate memory'
+    #print 'Allocate memory'
     motifs_in_sequences_profile=np.zeros(len(fimo.motif_names))
 
     for idx_seq,c in enumerate(target_coords):
