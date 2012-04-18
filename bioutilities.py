@@ -709,7 +709,7 @@ class Genome_mm:
 
 
 class Fimo:
-    def __init__(self,meme_motifs_filename, bg_filename,p_value=1.e-4,temp_directory=None):
+    def __init__(self,meme_motifs_filename, bg_filename,p_value=1.e-4,temp_directory='./'):
 
         self.fimo_command= 'fimo --text --output-pthresh '+str(p_value)+'  -bgfile '+bg_filename+' '+meme_motifs_filename 
         self.temp_directory=temp_directory
@@ -732,24 +732,25 @@ class Fimo:
                     print 'problem with this line:', line
 
         
-    def extract_motifs(self,seq, set_mode=False):
-        if set_mode:
-            motifs_in_sequence=set()
-        else:
+    def extract_motifs(self,seq, report_mode='full'):
+        if report_mode=='indexes_set':
+                motifs_in_sequence=set()
+        elif report_mode=='fq_array':
+            motifs_in_sequence=np.zeros(len(self.motif_names))
+        elif report_mode=='full':
             motifs_in_sequence=list()
+        else:
+            raise Exception('report_mode not recognized')
+            
         
         with tempfile.NamedTemporaryFile('w+',dir=self.temp_directory,delete=False) as tmp_file:
             tmp_file.write(''.join(['>S\n',seq,'\n']))
             tmp_filename=tmp_file.name
             tmp_file.close()
             
-            #print tmp_filename
-            #print self.fimo_command+' '+tmp_filename
-            
             fimo_process=subprocess.Popen(self.fimo_command+' '+tmp_filename,stdin=None,stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
             output=fimo_process.communicate()[0]
             fimo_process.wait()
-            #print output
             
             os.remove(tmp_filename)
             
@@ -760,22 +761,27 @@ class Fimo:
                     fields=line.split('\t')
                     motif_id=fields[0]
                     motif_name=self.motif_id_to_name[motif_id]
-    
-                    if not set_mode:
+                    
+                    if report_mode=='full':
                         c_start=float(fields[2])
                         c_end=float(fields[3])
                         strand=fields[4]
                         score=float(fields[5])
                         p_value=float(fields[6])
                         
-                        
+                     
                         motifs_in_sequence.append({'id':motif_id,'name':motif_name,'start':c_start,'end':c_end,'strand':strand,'score':score,'p_value':p_value})
-                    else:
+                    elif report_mode=='indexes_set':
                         motifs_in_sequence.add(self.motif_name_to_index[motif_name])
                     
-        return list(motifs_in_sequence)
+                    elif report_mode=='fq_array':
+                        motifs_in_sequence[self.motif_name_to_index[motif_name]]+=1
+                    
+                   
 
-def build_motif_in_seq_matrix(bed_filename,genome_directory,meme_motifs_filename,bg_filename,genome_mm=True,temp_directory=None,mask_repetitive=False):
+            return motifs_in_sequence if report_mode=='fq_array' else list(motifs_in_sequence)
+
+def build_motif_in_seq_matrix(bed_filename,genome_directory,meme_motifs_filename,bg_filename,genome_mm=True,temp_directory='./',mask_repetitive=False,p_value=1.e-4):
 
     print 'Loading coordinates  from bed'
     target_coords=Coordinate.bed_to_coordinates(bed_filename)
@@ -787,7 +793,7 @@ def build_motif_in_seq_matrix(bed_filename,genome_directory,meme_motifs_filename
         genome=Genome(genome_directory)
 
     print 'Initilize Fimo and load motifs'
-    fimo=Fimo(meme_motifs_filename,bg_filename,temp_directory=temp_directory)
+    fimo=Fimo(meme_motifs_filename,bg_filename,temp_directory=temp_directory,p_value=p_value)
 
     print 'Initialize the matrix'
     motifs_in_sequences_matrix=np.zeros((len(target_coords),len(fimo.motif_names)))
@@ -795,9 +801,30 @@ def build_motif_in_seq_matrix(bed_filename,genome_directory,meme_motifs_filename
     for idx_seq,c in enumerate(target_coords):
         seq=genome.extract_sequence(c,mask_repetitive)
         print idx_seq, len(target_coords)
-        motifs_in_sequences_matrix[idx_seq,fimo.extract_motifs(seq,set_mode=True)]=1
+        motifs_in_sequences_matrix[idx_seq,fimo.extract_motifs(seq,report_mode='indexes_set')]=1
 
     return motifs_in_sequences_matrix, fimo.motif_names
+
+
+
+def build_motif_profile(target_coords,genome,meme_motifs_filename,bg_filename,genome_mm=True,temp_directory='./',mask_repetitive=False,p_value=1.e-4):
+
+
+    #print 'Initilize Fimo and load motifs'
+    fimo=Fimo(meme_motifs_filename,bg_filename,temp_directory=temp_directory,p_value=p_value)
+
+    #print 'Allocate memory'
+    motifs_in_sequences_profile=np.zeros(len(fimo.motif_names))
+
+    for idx_seq,c in enumerate(target_coords):
+        seq=genome.extract_sequence(c,mask_repetitive)
+        print idx_seq, len(target_coords)
+        motifs=fimo.extract_motifs(seq,report_mode='fq_array')
+        motifs_in_sequences_profile+=motifs
+
+    return motifs_in_sequences_matrix, fimo.motif_names
+
+
 
 
 def extract_bg_from_bed(bed_filename,genome_directory,bg_filename,genome_mm=True):
