@@ -806,7 +806,7 @@ def build_motif_in_seq_matrix(bed_filename,genome_directory,meme_motifs_filename
 
 
 
-def build_motif_profile(target_coords,genome,meme_motifs_filename,bg_filename,genome_mm=True,temp_directory='./',mask_repetitive=False,p_value=1.e-4):
+def build_motif_profile(target_coords,genome,meme_motifs_filename,bg_filename,genome_mm=True,temp_directory='./',mask_repetitive=False,p_value=1.e-4,check_only_presence=False):
 
 
     #print 'Initilize Fimo and load motifs'
@@ -818,8 +818,10 @@ def build_motif_profile(target_coords,genome,meme_motifs_filename,bg_filename,ge
     for idx_seq,c in enumerate(target_coords):
         seq=genome.extract_sequence(c,mask_repetitive)
         print idx_seq, len(target_coords)
-        motifs=fimo.extract_motifs(seq,report_mode='fq_array')
-        motifs_in_sequences_profile+=motifs
+        if check_only_presence:
+            motifs_in_sequences_profile[fimo.extract_motifs(seq,report_mode='indexes_set')]+=1
+        else:
+            motifs_in_sequences_profile+=fimo.extract_motifs(seq,report_mode='fq_array')
 
     return motifs_in_sequences_profile, fimo.motif_names
 
