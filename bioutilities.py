@@ -745,6 +745,7 @@ class Fimo:
         
         with tempfile.NamedTemporaryFile('w+',dir=self.temp_directory,delete=False) as tmp_file:
             tmp_file.write(''.join(['>S\n',seq,'\n']))
+            print seq
             tmp_filename=tmp_file.name
             tmp_file.close()
             
