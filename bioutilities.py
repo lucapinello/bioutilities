@@ -762,6 +762,7 @@ class Fimo:
                     motif_id=fields[0]
                     motif_name=self.motif_id_to_name[motif_id]
                     
+                    print motif_name
                     if report_mode=='full':
                         c_start=float(fields[2])
                         c_end=float(fields[3])
@@ -777,8 +778,7 @@ class Fimo:
                     elif report_mode=='fq_array':
                         motifs_in_sequence[self.motif_name_to_index[motif_name]]+=1
                     
-                   
-
+ 
             return motifs_in_sequence if report_mode=='fq_array' else list(motifs_in_sequence)
 
 def build_motif_in_seq_matrix(bed_filename,genome_directory,meme_motifs_filename,bg_filename,genome_mm=True,temp_directory='./',mask_repetitive=False,p_value=1.e-4):
