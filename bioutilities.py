@@ -762,7 +762,6 @@ class Fimo:
                     motif_id=fields[0]
                     motif_name=self.motif_id_to_name[motif_id]
                     
-                    print motif_name
                     if report_mode=='full':
                         c_start=float(fields[2])
                         c_end=float(fields[3])
