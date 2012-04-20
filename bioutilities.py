@@ -830,7 +830,7 @@ def build_motif_profile(target_coords,genome,meme_motifs_filename,bg_filename,ge
             motifs_in_sequences_profile[fimo.extract_motifs(seq,report_mode='indexes_set')]+=1
         else:
             motifs_in_sequences=fimo.extract_motifs(seq,report_mode='fq_and_presence')
-            motifs_in_sequences_profile['presence'][list(motifs_in_sequences['presence'])]
+            motifs_in_sequences_profile['presence'][list(motifs_in_sequences['presence'])]+=1
             motifs_in_sequences_profile['fq']+=motifs_in_sequences['fq']
 
     return motifs_in_sequences_profile, fimo.motif_names
