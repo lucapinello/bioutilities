@@ -822,7 +822,7 @@ def build_motif_profile(target_coords,genome,meme_motifs_filename,bg_filename,ge
     if check_only_presence:
         motifs_in_sequences_profile=np.zeros(len(fimo.motif_names))
     else:
-        motifs_in_sequences_profile={'fq':np.zeros(len(fimo.motif_names)),'presence':np.zeros(len(fimo.motif_names))}
+        motifs_in_sequences_profile={'fq':np.zeros((len(target_coords),len(fimo.motif_names))),'presence':np.zeros(len(fimo.motif_names))}
     for idx_seq,c in enumerate(target_coords):
         seq=genome.extract_sequence(c,mask_repetitive)
         print idx_seq, len(target_coords)
@@ -832,7 +832,7 @@ def build_motif_profile(target_coords,genome,meme_motifs_filename,bg_filename,ge
             motifs_in_sequences=fimo.extract_motifs(seq,report_mode='fq_and_presence')
             #print motifs_in_sequences,motifs_in_sequences['presence'],motifs_in_sequences['fq']
             motifs_in_sequences_profile['presence'][list(motifs_in_sequences['presence'])]+=1
-            motifs_in_sequences_profile['fq']+=motifs_in_sequences['fq']
+            motifs_in_sequences_profile['fq'][idx_seq,:]+=motifs_in_sequences['fq']
 
     return motifs_in_sequences_profile, fimo.motif_names
 
