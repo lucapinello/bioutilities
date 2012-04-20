@@ -739,6 +739,8 @@ class Fimo:
             motifs_in_sequence=np.zeros(len(self.motif_names))
         elif report_mode=='full':
             motifs_in_sequence=list()
+        elif report_mode=='fq_and_presence':
+            motifs_in_sequence={'presence':set(),'fq':np.zeros(len(self.motif_names))}
         else:
             raise Exception('report_mode not recognized')
             
@@ -777,6 +779,10 @@ class Fimo:
                     elif report_mode=='fq_array':
                         motifs_in_sequence[self.motif_name_to_index[motif_name]]+=1
                     
+                    elif report_mode=='fq_and_presence':
+                        motifs_in_sequence['presence'].add(self.motif_name_to_index[motif_name])
+                        motifs_in_sequence['fq'][self.motif_name_to_index[motif_name]]+=1
+                    
  
             return motifs_in_sequence if report_mode=='fq_array' else list(motifs_in_sequence)
 
@@ -813,15 +819,19 @@ def build_motif_profile(target_coords,genome,meme_motifs_filename,bg_filename,ge
     fimo=Fimo(meme_motifs_filename,bg_filename,temp_directory=temp_directory,p_value=p_value)
 
     #print 'Allocate memory'
-    motifs_in_sequences_profile=np.zeros(len(fimo.motif_names))
-
+    if check_only_presence:
+        motifs_in_sequences_profile=np.zeros(len(fimo.motif_names))
+    else:
+        motifs_in_sequences_profile={'fq':np.zeros(len(fimo.motif_names)),'presence':np.zeros(len(fimo.motif_names))}
     for idx_seq,c in enumerate(target_coords):
         seq=genome.extract_sequence(c,mask_repetitive)
         print idx_seq, len(target_coords)
         if check_only_presence:
             motifs_in_sequences_profile[fimo.extract_motifs(seq,report_mode='indexes_set')]+=1
         else:
-            motifs_in_sequences_profile+=fimo.extract_motifs(seq,report_mode='fq_array')
+            motifs_in_sequences=fimo.extract_motifs(seq,report_mode='fq_and_presence')
+            motifs_in_sequences_profile['presence'][list(motifs_in_sequences['presence'])]
+            motifs_in_sequences_profile['fq']+=motifs_in_sequences['fq']
 
     return motifs_in_sequences_profile, fimo.motif_names
 
