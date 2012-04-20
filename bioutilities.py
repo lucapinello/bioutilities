@@ -784,7 +784,7 @@ class Fimo:
                         motifs_in_sequence['fq'][self.motif_name_to_index[motif_name]]+=1
                     
  
-            return motifs_in_sequence if report_mode=='fq_array' else list(motifs_in_sequence)
+            return motifs_in_sequence if report_mode=='fq_array' or 'fq_and_presence' else list(motifs_in_sequence)
 
 def build_motif_in_seq_matrix(bed_filename,genome_directory,meme_motifs_filename,bg_filename,genome_mm=True,temp_directory='./',mask_repetitive=False,p_value=1.e-4):
 
