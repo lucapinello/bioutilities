@@ -786,7 +786,7 @@ class Fimo:
  
             return motifs_in_sequence if report_mode=='fq_array' or 'fq_and_presence' else list(motifs_in_sequence)
 
-def build_motif_in_seq_matrix(bed_filename,genome_directory,meme_motifs_filename,bg_filename,genome_mm=True,temp_directory='./',mask_repetitive=False,p_value=1.e-4):
+def build_motif_in_seq_matrix(bed_filename,genome_directory,meme_motifs_filename,bg_filename,genome_mm=True,temp_directory='./',mask_repetitive=False,p_value=1.e-4, check_only_presence=False):
 
     print 'Loading coordinates  from bed'
     target_coords=Coordinate.bed_to_coordinates(bed_filename)
@@ -806,7 +806,11 @@ def build_motif_in_seq_matrix(bed_filename,genome_directory,meme_motifs_filename
     for idx_seq,c in enumerate(target_coords):
         seq=genome.extract_sequence(c,mask_repetitive)
         print idx_seq, len(target_coords)
-        motifs_in_sequences_matrix[idx_seq,fimo.extract_motifs(seq,report_mode='indexes_set')]=1
+        if check_only_presence:
+            motifs_in_sequences_matrix[idx_seq,fimo.extract_motifs(seq,report_mode='indexes_set')]=1
+        else:
+            motifs_in_sequences_matrix[idx_seq,:]+=fimo.extract_motifs(seq,report_mode='fq_array')
+            
 
     return motifs_in_sequences_matrix, fimo.motif_names
 
