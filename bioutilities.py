@@ -812,7 +812,7 @@ def build_motif_in_seq_matrix(bed_filename,genome_directory,meme_motifs_filename
             motifs_in_sequences_matrix[idx_seq,:]+=fimo.extract_motifs(seq,report_mode='fq_array')
             
 
-    return motifs_in_sequences_matrix, fimo.motif_names
+    return motifs_in_sequences_matrix, fimo.motif_names, fimo.motif_ids
 
 
 
@@ -838,7 +838,7 @@ def build_motif_profile(target_coords,genome,meme_motifs_filename,bg_filename,ge
             motifs_in_sequences_profile['presence'][list(motifs_in_sequences['presence'])]+=1
             motifs_in_sequences_profile['fq'][idx_seq,:]+=motifs_in_sequences['fq']
 
-    return motifs_in_sequences_profile, fimo.motif_names
+    return motifs_in_sequences_profile, fimo.motif_names, fimo.motif_ids
 
 
 
