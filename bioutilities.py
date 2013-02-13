@@ -14,6 +14,11 @@ import numpy as np
 import tempfile
 import os
 from bx.intervals.intersection import Intersecter, Interval
+from blist import sorteddict
+from numpy.random import randint
+
+
+
 #from Bio import SeqIO
 #from twobitreader import TwoBitFile
 
@@ -309,6 +314,33 @@ class Coordinate:
         return [Coordinate(c.chr_id,c.bpcenter-half_window,c.bpcenter+half_window,strand=c.strand,name=c.name,score=c.score) for c in coords]
 
 
+
+class Coordinates_Intersecter:
+    def __init__(self,coordinates):
+        self.coord_to_row_index=sorteddict()
+        self.interval_tree=dict()
+
+        row_index=0     
+        for c in coordinates:
+            if c.chr_id not in self.interval_tree:
+                self.interval_tree[c.chr_id]=Intersecter()
+
+            self.interval_tree[c.chr_id].add_interval(Interval(c.bpstart,c.bpend))
+            self.coord_to_row_index[c]=row_index
+            row_index+=1
+
+    def find_intersections(self,c):
+        coords_in_common=list()
+        if self.interval_tree.has_key(c.chr_id):
+            coords_hits=self.interval_tree[c.chr_id].find(c.bpstart-1, c.bpend+1)
+            
+            for coord_hit in coords_hits:
+                row_index=self.coord_to_row_index[Coordinate.coordinates_from_interval(c.chr_id, coord_hit)]
+                coords_in_common.append(self.coord_to_row_index.keys()[row_index])
+
+            return coords_in_common
+
+
 class Gene:
     
     regions=[8000,2000,0,1000]
@@ -488,7 +520,7 @@ class Gene:
         Coordinate.coordinates_to_bed(introns,genome_name+'introns.bed',minimal_format=minimal_format)
         del(introns)
 
-        promoters=Gene.promoter_coordinates_from_annotations(gene_annotation_file,promoter_region)
+        promoters=Gene.promoter_coordinates_from_annotations(gene_annotation_file,promoter_region=promoter_region)
         Coordinate.coordinates_to_bed(promoters,genome_name+'promoters.bed',minimal_format=True)
         del(promoters)
  

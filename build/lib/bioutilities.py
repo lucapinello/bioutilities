@@ -14,6 +14,11 @@ import numpy as np
 import tempfile
 import os
 from bx.intervals.intersection import Intersecter, Interval
+from blist import sorteddict
+from numpy.random import randint
+
+
+
 #from Bio import SeqIO
 #from twobitreader import TwoBitFile
 
@@ -309,6 +314,33 @@ class Coordinate:
         return [Coordinate(c.chr_id,c.bpcenter-half_window,c.bpcenter+half_window,strand=c.strand,name=c.name,score=c.score) for c in coords]
 
 
+
+class Coordinates_Intersecter:
+    def __init__(self,coordinates):
+        self.coord_to_row_index=sorteddict()
+        self.interval_tree=dict()
+
+        row_index=0     
+        for c in coordinates:
+            if c.chr_id not in self.interval_tree:
+                self.interval_tree[c.chr_id]=Intersecter()
+
+            self.interval_tree[c.chr_id].add_interval(Interval(c.bpstart,c.bpend))
+            self.coord_to_row_index[c]=row_index
+            row_index+=1
+
+    def find_intersections(self,c):
+        coords_in_common=list()
+        if self.interval_tree.has_key(c.chr_id):
+            coords_hits=self.interval_tree[c.chr_id].find(c.bpstart-1, c.bpend+1)
+            
+            for coord_hit in coords_hits:
+                row_index=self.coord_to_row_index[Coordinate.coordinates_from_interval(c.chr_id, coord_hit)]
+                coords_in_common.append(self.coord_to_row_index.keys()[row_index])
+
+            return coords_in_common
+
+
 class Gene:
     
     regions=[8000,2000,0,1000]
@@ -488,7 +520,7 @@ class Gene:
         Coordinate.coordinates_to_bed(introns,genome_name+'introns.bed',minimal_format=minimal_format)
         del(introns)
 
-        promoters=Gene.promoter_coordinates_from_annotations(gene_annotation_file,promoter_region)
+        promoters=Gene.promoter_coordinates_from_annotations(gene_annotation_file,promoter_region=promoter_region)
         Coordinate.coordinates_to_bed(promoters,genome_name+'promoters.bed',minimal_format=True)
         del(promoters)
  
@@ -739,6 +771,8 @@ class Fimo:
             motifs_in_sequence=np.zeros(len(self.motif_names))
         elif report_mode=='full':
             motifs_in_sequence=list()
+        elif report_mode=='fq_and_presence':
+            motifs_in_sequence={'presence':set(),'fq':np.zeros(len(self.motif_names))}
         else:
             raise Exception('report_mode not recognized')
             
@@ -777,11 +811,14 @@ class Fimo:
                     elif report_mode=='fq_array':
                         motifs_in_sequence[self.motif_name_to_index[motif_name]]+=1
                     
-                   
+                    elif report_mode=='fq_and_presence':
+                        motifs_in_sequence['presence'].add(self.motif_name_to_index[motif_name])
+                        motifs_in_sequence['fq'][self.motif_name_to_index[motif_name]]+=1
+                    
+ 
+            return motifs_in_sequence if report_mode=='fq_array' or 'fq_and_presence' else list(motifs_in_sequence)
 
-            return motifs_in_sequence if report_mode=='fq_array' else list(motifs_in_sequence)
-
-def build_motif_in_seq_matrix(bed_filename,genome_directory,meme_motifs_filename,bg_filename,genome_mm=True,temp_directory='./',mask_repetitive=False,p_value=1.e-4):
+def build_motif_in_seq_matrix(bed_filename,genome_directory,meme_motifs_filename,bg_filename,genome_mm=True,temp_directory='./',mask_repetitive=False,p_value=1.e-4, check_only_presence=False):
 
     print 'Loading coordinates  from bed'
     target_coords=Coordinate.bed_to_coordinates(bed_filename)
@@ -801,28 +838,39 @@ def build_motif_in_seq_matrix(bed_filename,genome_directory,meme_motifs_filename
     for idx_seq,c in enumerate(target_coords):
         seq=genome.extract_sequence(c,mask_repetitive)
         print idx_seq, len(target_coords)
-        motifs_in_sequences_matrix[idx_seq,fimo.extract_motifs(seq,report_mode='indexes_set')]=1
+        if check_only_presence:
+            motifs_in_sequences_matrix[idx_seq,fimo.extract_motifs(seq,report_mode='indexes_set')]=1
+        else:
+            motifs_in_sequences_matrix[idx_seq,:]+=fimo.extract_motifs(seq,report_mode='fq_array')
+            
 
-    return motifs_in_sequences_matrix, fimo.motif_names
+    return motifs_in_sequences_matrix, fimo.motif_names, fimo.motif_ids
 
 
 
-def build_motif_profile(target_coords,genome,meme_motifs_filename,bg_filename,genome_mm=True,temp_directory='./',mask_repetitive=False,p_value=1.e-4):
+def build_motif_profile(target_coords,genome,meme_motifs_filename,bg_filename,genome_mm=True,temp_directory='./',mask_repetitive=False,p_value=1.e-4,check_only_presence=False):
 
 
     #print 'Initilize Fimo and load motifs'
     fimo=Fimo(meme_motifs_filename,bg_filename,temp_directory=temp_directory,p_value=p_value)
 
     #print 'Allocate memory'
-    motifs_in_sequences_profile=np.zeros(len(fimo.motif_names))
-
+    if check_only_presence:
+        motifs_in_sequences_profile=np.zeros(len(fimo.motif_names))
+    else:
+        motifs_in_sequences_profile={'fq':np.zeros((len(target_coords),len(fimo.motif_names))),'presence':np.zeros(len(fimo.motif_names))}
     for idx_seq,c in enumerate(target_coords):
         seq=genome.extract_sequence(c,mask_repetitive)
         print idx_seq, len(target_coords)
-        motifs=fimo.extract_motifs(seq,report_mode='fq_array')
-        motifs_in_sequences_profile+=motifs
+        if check_only_presence:
+            motifs_in_sequences_profile[fimo.extract_motifs(seq,report_mode='indexes_set')]+=1
+        else:
+            motifs_in_sequences=fimo.extract_motifs(seq,report_mode='fq_and_presence')
+            #print motifs_in_sequences,motifs_in_sequences['presence'],motifs_in_sequences['fq']
+            motifs_in_sequences_profile['presence'][list(motifs_in_sequences['presence'])]+=1
+            motifs_in_sequences_profile['fq'][idx_seq,:]+=motifs_in_sequences['fq']
 
-    return motifs_in_sequences_matrix, fimo.motif_names
+    return motifs_in_sequences_profile, fimo.motif_names, fimo.motif_ids
 
 
 
