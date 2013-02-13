@@ -1,30 +1,22 @@
 '''
 Created on May 3, 2011
 
-@author: lpinello
+@author: Luca Pinello
 '''
 import os, glob, string
 import xlrd
+import numpy as np
+from numpy.random import randint
 from scipy.stats import rv_discrete
 from scipy.io.matlab import savemat
 import mmap
 import math
 import subprocess
-import numpy as np
 import tempfile
-import os
 from bx.intervals.intersection import Intersecter, Interval
 from blist import sorteddict
-from numpy.random import randint
-
-
-
-#from Bio import SeqIO
-#from twobitreader import TwoBitFile
-
 
 mask=lambda c: c if c.isupper() else 'N' 
-
 
 def chunks(l, n):
  return [l[i:i+n] for i in range(0, len(l), n)]
@@ -61,6 +53,33 @@ def read_sequence_from_fasta(fin, bpstart, bpend, line_length=50.0):
     
     return seq[0:nbp].lower()
 
+def FastaIterator(handle):
+
+    while True:
+        line = handle.readline()
+        if line == "" : return 
+        if line[0] == ">": #skip >
+            break
+
+    while True:
+        if line[0]!=">":
+            raise ValueError("Fasta files should start with '>'")
+        else:
+            descr = line[1:].rstrip()
+            id = descr.split()[0]
+            name = id
+
+        lines = []
+        line = handle.readline()
+        while True:
+            if not line : break
+            if line[0] == ">": break
+            lines.append(line.rstrip().replace(" ","").replace("\r",""))
+            line = handle.readline()
+
+        yield "".join(lines)
+
+        if not line : return #End
 
 class Coordinate:
     
@@ -313,8 +332,6 @@ class Coordinate:
         half_window=window_size/2
         return [Coordinate(c.chr_id,c.bpcenter-half_window,c.bpcenter+half_window,strand=c.strand,name=c.name,score=c.score) for c in coords]
 
-
-
 class Coordinates_Intersecter:
     def __init__(self,coordinates):
         self.coord_to_row_index=sorteddict()
@@ -339,7 +356,6 @@ class Coordinates_Intersecter:
                 coords_in_common.append(self.coord_to_row_index.keys()[row_index])
 
             return coords_in_common
-
 
 class Gene:
     
@@ -532,7 +548,6 @@ class Gene:
     intra_c=property(intra_c)
     full_c=property(full_c)
 
-            
 class Sequence:
     
     def __init__(self,seq=''):
@@ -664,7 +679,6 @@ class Genome:
                 return Sequence.reverse_complement(seq)
             else:
                 return seq        
-            
 
 class Genome_mm:
     
@@ -737,8 +751,6 @@ class Genome_mm:
             counting[nt]/=all
         
         return counting
-    
-
 
 class Fimo:
     def __init__(self,meme_motifs_filename, bg_filename,p_value=1.e-4,temp_directory='./'):
@@ -846,8 +858,6 @@ def build_motif_in_seq_matrix(bed_filename,genome_directory,meme_motifs_filename
 
     return motifs_in_sequences_matrix, fimo.motif_names, fimo.motif_ids
 
-
-
 def build_motif_profile(target_coords,genome,meme_motifs_filename,bg_filename,genome_mm=True,temp_directory='./',mask_repetitive=False,p_value=1.e-4,check_only_presence=False):
 
 
@@ -871,9 +881,6 @@ def build_motif_profile(target_coords,genome,meme_motifs_filename,bg_filename,ge
             motifs_in_sequences_profile['fq'][idx_seq,:]+=motifs_in_sequences['fq']
 
     return motifs_in_sequences_profile, fimo.motif_names, fimo.motif_ids
-
-
-
 
 def extract_bg_from_bed(bed_filename,genome_directory,bg_filename,genome_mm=True):
     
@@ -905,7 +912,6 @@ def extract_bg_from_bed(bed_filename,genome_directory,bg_filename,genome_mm=True
     with open(bg_filename, 'w+') as out_file:
         for nt in ['a','c','t','g']:
             out_file.write('%s\t%1.4f\n' % (nt,acgt_fq[nt]))
-
 
 #hgWiggle wrapper
 def read_from_wig(c,wig_path,wig_mask='.phastCons44way.hg18.compiled',only_average=False):
@@ -1034,202 +1040,133 @@ class Annotator:
         primes=self.__gen_primes()
         return [primes.next() for i in range(n)]
 
-
-''' OLD STUFF
-def set_genome(genome='human'):
-    if genome=='human':
-        int2chr_id=dict(enumerate(['chr'+id for id in (map(str,range(1,23))+['X','Y'])],start=1));
-    elif genome=='mouse':
-        int2chr_id=dict(enumerate(['chr'+id for id in (map(str,range(1,20))+['X','Y','M'] ) ],start=1));
-    else:
-        raise Exception('not implemented')
-    
-    chr_id2int=dict((v,k) for k, v in int2chr_id.iteritems())
-    
-    return int2chr_id,chr_id2int
-
-#HUMAN
-#int2chr_id=dict(enumerate(['chr'+id for id in (map(str,range(1,23))+['X','Y'])],start=1));
-
-#MOUSE
-#int2chr_id=dict(enumerate(['chr'+id for id in (map(str,range(1,20))+['X','Y','M'] ) ],start=1));
-#chr_id2int=dict((v,k) for k, v in int2chr_id.iteritems());
-
-
-int2chr_id,chr_id2int=set_genome()
-#print int2chr_id,chr_id2int
-
-class Genome_2bit():
-    
-    #def __init__(self, 2bit_genome_file,release='ND'):
-    def __init__(self,genome_file,release='ND'):
-        self.data=TwoBitFile(genome_file)    
-        self.release=release
-    
-    def extract_sequence(self,c):
-        try:
-            return self.data[c.chr_id][c.bpstart-1:c.bpend]
-        except:
-            print 'Bad coordinate in genome:',str(c)
+class Ngram:
+    def __init__(self,ngram_length=4,alphabet_size=4):
+        #print 'Ngram initialization'
+        #build useful dictionary
+        self.alphabet_size=alphabet_size
+        self.ngram_length=ngram_length
         
-
-class Genome:
-    def __init__(self,genome_directory,number_of_chromosomes,release='ND'):
-        self.chr=[None]*(number_of_chromosomes+1)
-        self.genome_directory=genome_directory
-        try:
-            self.chr_len=map(int,open(os.path.join(genome_directory, 'chrlen.txt')).readlines())
-            self.chr_len=[None]+self.chr_len
-        except:
-            self.chr_len=None
-            
-
-        self.release=release
-        #print self.chr_len
-        #print 'list_length:',len(self.chr_len)
+        all_ngram=map(self.int2ngram,range(self.alphabet_size**self.ngram_length),[self.ngram_length]*(self.alphabet_size**self.ngram_length),[self.alphabet_size]*(self.alphabet_size**self.ngram_length))
+        self.ngram2index=dict()
+        self.index2ngram=dict()
+        self.non_redundant_ngram2index=dict()
+        self.non_redundant_index2ngram=dict()
+        self.ngram_rev_complement=dict()
+        self.number_of_ngrams=len(all_ngram)    
         
-        for infile in glob.glob( os.path.join(genome_directory, '*.fa') ):
-            try:
-                chr_idx=chr_id2int[ infile.replace(genome_directory,'').replace('.fa','')]
-                self.chr[chr_idx] = open(infile,'r')
-            except:
-                print 'not loaded:',infile
-            #print 'Readed:'+ infile
-            #print 'length:',self.chr_len[chr_idx-1]
-            
-    def estimate_background(self):
-        counting={'a':0,'c':0,'g':0,'t':0}
-
-        for i in range(1,len(self.chr)):
-            print self.chr[i]
-            
-
-            self.chr[i].seek(0)
-            self.chr[i].readline()
-            
-            
-            for line in self.chr[i]:
-                for nt in counting.keys():
-                    counting[nt]+=line.lower().count(nt)
+        for idx,ngram in enumerate(all_ngram):
+            self.ngram2index[ngram]=idx
+            self.ngram_rev_complement[ngram]=Sequence.reverse_complement(ngram)
+            self.index2ngram[idx]=ngram
         
-        print counting
-        return counting
-
-                    
-    #def __del__(self):
-        #for file in chr:
-        #    file.close()
-       
-    def read_seq_from_fasta(self,fin, bpstart, bpend):
-        bpstart-=1
-        bpend-=1
-        fin.seek(0)
-        head_length=len(fin.readline()) #assuming the first line is header
-        nbp = int(bpend - bpstart + 1 + (bpend - bpstart + 1)/50) #devi considerare  pure gli a capo
-        offset = bpstart + math.floor(bpstart/50) + head_length #assuming each line contains 50 characters; add 1 offset per line
-        fin.seek(offset, 0)
-
-        s = fin.read(nbp)
         
-        if len(s) < nbp: 
-            print 'Genome range out of scope for ',bpstart,bpend
+        for idx,ngram in enumerate([all_ngram[i] for i in self.non_redundant_idx()]):
+            self.non_redundant_ngram2index[ngram]=idx
+            self.non_redundant_index2ngram[idx]=ngram
+        
+        self.number_of_non_redundant_ngrams=len(self.non_redundant_ngram2index)
+                
+    def int2ngram(self,idx,ngram_length,alphabet_size):
+        l=[]
+        for _ in range(ngram_length):
+            l.append(int2nt[idx % alphabet_size])
+            idx/=alphabet_size
+
+        return "".join(l)[-1::-1]
+    
+    def non_redundant_idx(self):
+        ngram_taken=set()
+        non_redundant_idxs=[]
+        for idx in range(self.number_of_ngrams):
+            n=self.index2ngram[idx]
+            if (self.ngram2index[n] in ngram_taken) or (self.ngram2index[self.ngram_rev_complement[n]] in ngram_taken ):
+                pass
+            else:
+                non_redundant_idxs.append(idx)
+                ngram_taken.add(self.ngram2index[n])
+                ngram_taken.add(self.ngram2index[self.ngram_rev_complement[n]])
+        
+        return tuple(non_redundant_idxs)
+    
+    def build_ngram_fq_vector(self,seq):
    
+        ngram_vector=zeros(self.number_of_ngrams)
+   
+        for i in xrange(len(seq)-self.ngram_length+1):
+            try:
+                ngram_vector[self.ngram2index[seq[i:i+self.ngram_length]]]+=1
+            except:
+                pass
+            #ngram_vector[self.ngram2index[self.ngram_rev_complement[seq[i:i+self.ngram_length]]]]+=1
         
+        return ngram_vector
     
-    
-    def read_sequence_from_fasta(self,fin, bpstart, bpend, line_length=50.0):
-        bpstart=bpstart-1
-        fin.seek(0)
-        fin.readline()  #read the first line; the pointer is at the second line
-        nbp = bpend - bpstart
-        offset = bpstart + math.floor(bpstart/line_length) #assuming each line contains 50 characters; add 1 offset per line
-        fin.seek(int(offset),1)
-        seq = fin.read(nbp+int(math.floor(nbp/line_length))+1)
-        seq = seq.replace('\n','')
-        fin.close
-        
-        if len(seq) < nbp: 
-            print 'Genome range out of scope for ',bpstart,bpend
-        return seq.replace('\n','')[0:nbp].lower()
-        
-    
-  
-    def extract_sequence(self,coordinate):
-        #if self.chr[chrstr2int(coordinate.chr_id)]==None:
-        if self.chr[chr_id2int[coordinate.chr_id]]==None:
-            print "Chromosome %s not readed"% coordinate.chr_id
-        else:
+    def build_ngram_fq_vector_non_redundant(self,seq):
+   
+        ngram_vector=zeros(self.number_of_non_redundant_ngrams)
+   
+        for i in xrange(len(seq)-self.ngram_length+1):
             
-            return self.read_seq_from_fasta(self.chr[chr_id2int[coordinate.chr_id]],coordinate.bpstart,coordinate.bpend)
-            #return Sequence(self.chr[chrstr2int(coordinate.chr_id)][coordinate.bpstart-1:coordinate.bpend])
-            #return Sequence(self.chr[chr_id2int[coordinate.chr_id]].seq[coordinate.bpstart-1:coordinate.bpend])
-  
-    def extract_sequence(self,coordinate):
-        #if self.chr[chrstr2int(coordinate.chr_id)]==None:
-        if self.chr[chr_id2int[coordinate.chr_id]]==None:
-            print "Chromosome %s not readed"% coordinate.chr_id
-        else:
-            
-            return self.read_sequence_from_fasta(self.chr[chr_id2int[coordinate.chr_id]],coordinate.bpstart,coordinate.bpend)
-            #return Sequence(self.chr[chrstr2int(coordinate.chr_id)][coordinate.bpstart-1:coordinate.bpend])
-            #return Sequence(self.chr[chr_id2int[coordinate.chr_id]].seq[coordinate.bpstart-1:coordinate.bpend])
-
-
-
-
-
-
-class Genome_biopython:
-    def __init__(self,genome_directory,number_of_chromosomes):
-        self.chr=[None]*(number_of_chromosomes+1)
-        self.genome_directory=genome_directory
+            try:
+                ngram_vector[self.non_redundant_ngram2index[seq[i:i+self.ngram_length]]]+=1
+            except:
+                pass
+            try:
+                ngram_vector[self.non_redundant_ngram2index[self.ngram_rev_complement[seq[i:i+self.ngram_length]]]]+=1
+            except:
+                pass
         
-        for infile in glob.glob( os.path.join(genome_directory, '*.fa') ):
-            chr_idx=chr_id2int[ infile.replace(genome_directory,'').replace('.fa','')]
-            print genome_directory
-            print infile.replace(genome_directory,'').replace('.fa','')
-            self.chr[chr_idx] = SeqIO.read(open(infile), "fasta")
-            print 'Readed:'+ infile
-
-class Genome_mmap:
-        
-    def extract_sequence(self,coordinate):
-        #if self.chr[chrstr2int(coordinate.chr_id)]==None:
-        if self.chr[chr_id2int[coordinate.chr_id]]==None:
-            print "Chromosome %s not readed"% coordinate.chr_id
-        else:
-            #return Sequence(self.chr[chrstr2int(coordinate.chr_id)][coordinate.bpstart-1:coordinate.bpend])
-            return Sequence(self.chr[chr_id2int[coordinate.chr_id]][coordinate.bpstart-1:coordinate.bpend])
-            
-     
-    def fasta_to_mm(self,genome_directory):
-        for infile in glob.glob( os.path.join(genome_directory, '*.fa') ):
-            print "current file is: " + infile
-            filename=infile.replace(genome_directory,'').replace('.fa','');
-            with open(infile) as fi:
-                with open(filename+'.mm','w+') as fo:
-                    #skip header
-                    fi.readline()
-                    for line in fi:
-                        fo.write(line.rstrip())  
+        return ngram_vector
     
-    def read_chr(self,chr_idx):
-        #file_to_read=genome_directory+'/'+int2chrstr(chr_idx)+'.mm'
-        file_to_read=self.genome_directory+'/'+int2chr_id[chr_idx]+'.mm'
-        with open(file_to_read,'r+') as f:
-            self.chr[chr_idx]= mmap.mmap(f.fileno(),0) 
-            print "Chromosome:%s Readed"% str(chr_idx)
-    
-    def read_all_chr(self):
-        for chr_idx in range(1,len(self.chr)):
-            #file_to_read=genome_directory+'/'+int2chrstr(chr_idx)+'.mm'
-            file_to_read=self.genome_directory+'/'+int2chr_id[chr_idx]+'.mm'
-            print file_to_read
-            with open(file_to_read,'r+') as f:
-                self.chr[chr_idx]= mmap.mmap(f.fileno(),0)
-                print "Chromosome:%s Readed"% str(chr_idx)
-        print "All Chromosome Readed"
-
-'''
+    def build_ngrams_fq_matrix(self,seq_set,non_redundant=True):
+        if non_redundant:
+            ngram_matrix=zeros((len(seq_set),self.number_of_non_redundant_ngrams))
+            for idx_seq,seq in enumerate(seq_set):
+                ngram_matrix[idx_seq,:]=self.build_ngram_fq_vector_non_redundant(seq)
+        else:
+            ngram_matrix=zeros((len(seq_set),self.number_of_ngrams))
+            for idx_seq,seq in enumerate(seq_set):
+                ngram_matrix[idx_seq,:]=self.build_ngram_fq_vector(seq)
         
-          
+        return ngram_matrix,np.array([len(seq) for seq in seq_set],ndmin=2)
+
+    def build_ngram_profile_vector_non_redundant(self,seq):
+
+        profile=zeros(len(seq)-self.ngram_length+1)
+
+        for i in xrange(len(seq)-self.ngram_length+1):
+            
+            try:
+                profile[i]=self.non_redundant_ngram2index[seq[i:i+self.ngram_length]]
+            except:
+                pass
+            try:
+                profile[i]=self.non_redundant_ngram2index[self.ngram_rev_complement[seq[i:i+self.ngram_length]]]
+            except:
+                pass
+        
+        return profile
+
+
+    def build_ngrams_profile_matrix_non_redundant(self,seq_set):
+        profile_matrix=zeros((len(seq_set),len(seq_set[0])-self.ngram_length+1))
+        for idx_seq,seq in enumerate(seq_set):
+                profile_matrix[idx_seq,:]=self.build_ngram_profile_vector_non_redundant(seq)
+
+        return profile_matrix
+
+    
+    def save_to_file(self,filename=None):
+        if not filename:
+            filename='ng'+str(self.ngram_length)
+        with open(filename,'wb+') as outfile:
+            print 'saving...'
+            cPickle.dump(self, outfile,2)
+            print 'done'
+        
+    @classmethod
+    def load_from_file(cls,filename):
+        with open(filename,'rb') as infile:
+            return cPickle.load(infile)
+
