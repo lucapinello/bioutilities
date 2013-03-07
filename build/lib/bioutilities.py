@@ -3,18 +3,23 @@ Created on May 3, 2011
 
 @author: Luca Pinello
 '''
-import os, glob, string
-import xlrd
-import numpy as np
-from numpy.random import randint
-from scipy.stats import rv_discrete
-from scipy.io.matlab import savemat
 import mmap
 import math
+import os, glob, string
+import xlrd
+
+import numpy as np
+from numpy import zeros, inf, log2
+from numpy.random import  randint,permutation
+
+from scipy.stats import rv_discrete
+from scipy.io.matlab import savemat
+
 import subprocess
 import tempfile
 from bx.intervals.intersection import Intersecter, Interval
 from blist import sorteddict
+import cPickle
 
 mask=lambda c: c if c.isupper() else 'N' 
 

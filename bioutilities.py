@@ -207,6 +207,7 @@ class Coordinate:
                 infile.readline()
             
             for line in infile:
+                line=line.strip()
                 try:
                     coord=line.split('\t')
                     chr_id=coord[cl_chr_id]
