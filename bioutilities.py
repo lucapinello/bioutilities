@@ -820,9 +820,10 @@ class Fimo:
                         strand=fields[4]
                         score=float(fields[5])
                         p_value=float(fields[6])
+                        length=len(fields[7])
                         
                      
-                        motifs_in_sequence.append({'id':motif_id,'name':motif_name,'start':c_start,'end':c_end,'strand':strand,'score':score,'p_value':p_value})
+                        motifs_in_sequence.append({'id':motif_id,'name':motif_name,'start':c_start,'end':c_end,'strand':strand,'score':score,'p_value':p_value,'length':length})
                     elif report_mode=='indexes_set':
                         motifs_in_sequence.add(self.motif_name_to_index[motif_name])
                     
