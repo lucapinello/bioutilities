@@ -787,6 +787,7 @@ class Fimo:
         
         with open(meme_motifs_filename) as infile:
             self.motif_id_to_name=dict()
+            self.motif_id_to_index=dict()
             self.motif_names=[]
             self.motif_name_to_index=dict()
             self.motif_ids=[]
@@ -795,6 +796,7 @@ class Fimo:
                 try:
                     if 'MOTIF' in line:
                         self.motif_id_to_name[line.split()[1]]=line.split()[2]
+                        self.motif_id_to_index[line.split()[1]]=motif_index
                         self.motif_name_to_index[line.split()[2]]=motif_index
                         self.motif_ids.append(line.split()[1])
                         self.motif_names.append(line.split()[2])
