@@ -17,9 +17,16 @@ from scipy.io.matlab import savemat
 
 import subprocess
 import tempfile
+
 from bx.intervals.intersection import Intersecter, Interval
 from blist import sorteddict
+
 import cPickle
+
+try:
+    import pysam
+except:
+    print 'pysam is required for calculate_profile_matrix_bed_bam'
 
 mask=lambda c: c if c.isupper() else 'N' 
 
@@ -911,6 +918,36 @@ def build_motif_profile(target_coords,genome,meme_motifs_filename,bg_filename,ge
             motifs_in_sequences_profile['fq'][idx_seq,:]+=motifs_in_sequences['fq']
 
     return motifs_in_sequences_profile, fimo.motif_names, fimo.motif_ids
+
+
+'''
+given a set of coordinates in a bed file and a bam/sam file calculate the profile matrix
+'''
+def calculate_profile_matrix_bed_bam(bed_filename,sam_filename,window_size=5000, resolution=50, fragment_length=200):
+    cs=Coordinate.bed_to_coordinates(bed_filename)
+    samfile = pysam.Samfile(sam_filename)
+    n_bins=window_size/resolution
+    
+    profile_matrix=np.zeros((len(cs),n_bins))
+
+    for idx_c,c in enumerate(cs):
+        n_start=c.bpcenter-window_size/2
+        n_end=c.bpcenter+window_size/2
+
+        for rd in samfile.fetch(c.chr_id, n_start,n_end):
+            if rd.is_reverse:
+                rd_st=rd.positions[1]-fragment_length
+                rd_end=rd.positions[-1]
+            else:
+                rd_st=rd.positions[1]
+                rd_end=max(rd.positions[-1],rd.positions[1]+fragment_length)
+             
+            bin_idx_st=max(0,(rd_st-n_start)/resolution)
+            bin_idx_en=min(n_bins-1, (rd_end-n_start)/resolution)
+               
+            profile_matrix[idx_c,bin_idx_st:bin_idx_en]+=1
+    
+    return profile_matrix,samfile.mapped
 
 def extract_bg_from_bed(bed_filename,genome_directory,bg_filename,genome_mm=True):
     
