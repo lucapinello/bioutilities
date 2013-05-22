@@ -930,7 +930,7 @@ def calculate_profile_matrix_bed_bam(bed_filename,sam_filename,window_size=5000,
     profile_matrix=np.zeros((len(cs),n_bins))
 
     for idx_c,c in enumerate(cs):
-        n_start=c.bpcenter-window_size/2
+        n_start=max(0,c.bpcenter-window_size/2)
         n_end=c.bpcenter+window_size/2
 
         for rd in samfile.fetch(c.chr_id, n_start,n_end):
