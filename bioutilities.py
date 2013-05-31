@@ -522,7 +522,7 @@ class Gene:
                 access=fields[1]
                 exon_starts=map(int,fields[9].split(',')[:-1])
                 exon_ends=map(int,fields[10].split(',')[:-1])
-                introns=[Coordinate(chr_id,bpstart,bpend,strand=strand,name=access) for bpstart,bpend in zip(exon_ends[:-1],exon_starts[1:])]
+                introns=[Coordinate(chr_id,bpstart-1,bpend,strand=strand,name=access) for bpstart,bpend in zip(exon_ends[:-1],exon_starts[1:])]
                 introns_list+=introns
         
             return introns_list
