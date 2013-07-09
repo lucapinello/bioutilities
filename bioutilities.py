@@ -368,7 +368,7 @@ class Coordinates_Intersecter:
                 row_index=self.coord_to_row_index[Coordinate.coordinates_from_interval(c.chr_id, coord_hit)]
                 coords_in_common.append(self.coord_to_row_index.keys()[row_index])
 
-            return coords_in_common
+        return coords_in_common
 
 class Gene:
     
