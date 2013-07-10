@@ -19,7 +19,7 @@ import subprocess
 import tempfile
 
 from bx.intervals.intersection import Intersecter, Interval
-from blist import sorteddict
+
 
 import cPickle
 
@@ -347,7 +347,6 @@ class Coordinate:
 
 class Coordinates_Intersecter:
     def __init__(self,coordinates):
-        self.coord_to_row_index=sorteddict()
         self.interval_tree=dict()
 
         row_index=0     
@@ -356,8 +355,7 @@ class Coordinates_Intersecter:
                 self.interval_tree[c.chr_id]=Intersecter()
 
             self.interval_tree[c.chr_id].add_interval(Interval(c.bpstart,c.bpend))
-            self.coord_to_row_index[c]=row_index
-            row_index+=1
+ 
 
     def find_intersections(self,c):
         coords_in_common=list()
@@ -365,8 +363,7 @@ class Coordinates_Intersecter:
             coords_hits=self.interval_tree[c.chr_id].find(c.bpstart-1, c.bpend+1)
             
             for coord_hit in coords_hits:
-                row_index=self.coord_to_row_index[Coordinate.coordinates_from_interval(c.chr_id, coord_hit)]
-                coords_in_common.append(self.coord_to_row_index.keys()[row_index])
+                coords_in_common.append(Coordinate.coordinates_from_interval(c.chr_id, coord_hit))
 
         return coords_in_common
 
