@@ -277,7 +277,7 @@ class Coordinate:
                 if minimal_format:
                     outfile.write('%s\t%d\t%d\n' %(c.chr_id,c.bpstart,c.bpend) )
                 else:
-                    outfile.write('%s\t%d\t%d\t%s\t%f\t%s\n' %(c.chr_id,c.bpstart,c.bpend,c.name,c.score,c.strand) )
+                    outfile.write('%s\t%d\t%d\t%s\t%f\t%s\n' %(c.chr_id,c.bpstart,c.bpend,c.name if c.name else'ND',c.score if c.score else 0,c.strand if c.strand else '+') )
     @classmethod
     def coordinates_to_nscore_format(cls,coordinates,bed_file):
         with open(bed_file,'w+') as outfile:
