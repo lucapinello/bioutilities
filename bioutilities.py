@@ -919,8 +919,9 @@ def build_motif_profile(target_coords,genome,meme_motifs_filename,bg_filename,ge
 '''
 given a set of coordinates in a bed file and a bam/sam file calculate the profile matrix
 '''
-def calculate_profile_matrix_bed_bam(bed_filename,sam_filename,window_size=5000, resolution=50, fragment_length=200, use_strand=False):
-    cs=Coordinate.bed_to_coordinates(bed_filename)[0:]
+def calculate_profile_matrix_bed_bam(bed_filename,sam_filename,window_size=5000, resolution=50, fragment_length=200, use_strand=False,return_coordinates=False):
+    cs=Coordinate.bed_to_coordinates(bed_filename)
+    cs=Coordinate.coordinates_of_intervals_around_center(cs, window_size)
     samfile = pysam.Samfile(sam_filename)
     n_bins=(window_size/resolution)+1
     
@@ -949,8 +950,10 @@ def calculate_profile_matrix_bed_bam(bed_filename,sam_filename,window_size=5000,
         if use_strand and c.strand == '-':
             profile_matrix[idx_c,:]=profile_matrix[idx_c,::-1]
             
-    
-    return profile_matrix,samfile.mapped
+    if return_coordinates:
+        return profile_matrix,samfile.mapped,cs
+    else:    
+        return profile_matrix,samfile.mapped
 
 def extract_bg_from_bed(bed_filename,genome_directory,bg_filename,genome_mm=True):
     
