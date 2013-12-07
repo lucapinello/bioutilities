@@ -345,16 +345,16 @@ class Coordinate:
         half_window=window_size/2
         return [Coordinate(c.chr_id,c.bpcenter-half_window,c.bpcenter+half_window,strand=c.strand,name=c.name,score=c.score) for c in coords]
 
+#intersecter
 class Coordinates_Intersecter:
     def __init__(self,coordinates):
         self.interval_tree=dict()
 
-        row_index=0     
         for c in coordinates:
             if c.chr_id not in self.interval_tree:
                 self.interval_tree[c.chr_id]=Intersecter()
 
-            self.interval_tree[c.chr_id].add_interval(Interval(c.bpstart,c.bpend))
+            self.interval_tree[c.chr_id].add_interval(Interval(c.bpstart,c.bpend,c))
  
 
     def find_intersections(self,c):
@@ -363,7 +363,7 @@ class Coordinates_Intersecter:
             coords_hits=self.interval_tree[c.chr_id].find(c.bpstart-1, c.bpend+1)
             
             for coord_hit in coords_hits:
-                coords_in_common.append(Coordinate.coordinates_from_interval(c.chr_id, coord_hit))
+                coords_in_common.append(coord_hit.value)
 
         return coords_in_common
 
