@@ -1,0 +1,13 @@
+Python Bioutilities:  free and open source python library  tools to streamline the analysis of genomics data. 
+
+In the current version the library provides: 
+
+1.	A general genomic annotator, that go beyond the classic annotations such as promoter, exon, intron, intergenic, providing instead the possibility to annotate any set of genomic regions and also the opportunity to look for combinations of them.
+
+2.	An heatmap and profiler generator to study the co-localization and the enrichment of  genome-wide sequencing datasets such as chip-seq,  DNase-seq,  Bisulfite-seq with a custom resolution up to 1bp.
+
+3.	A set of basic operations on genomic coordinates (union, intersection, etc) specifically not relying on BedTools to provide a cross platform solution usable also on non Unix/Linux machine.
+
+4.	A set of python wrappers combined in automatic pipelines for common bioinformatics tasks (  PeakAnnotator, Bowtie, Macs, TopHat, Fimo)
+
+5.	A set of function to calculate sequence content and profiles in terms of k-mers of arbitrary length.
