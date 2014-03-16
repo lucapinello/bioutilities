@@ -157,7 +157,7 @@ class Coordinate:
         return self.chr_id+':'+str(self.bpstart)+'-'+str(self.bpend)+ (' '+self.name if self.name else '')  + ( ' '+  str(self.score) if self.score else '')+ (' '+self.strand if self.strand else '')
     
     def __len__(self):
-        return self.bpend-self.bpstart
+        return self.bpend-self.bpstart+1
     
     def __and__(self,other):
         if self.bpend < other.bpstart or other.bpend < self.bpstart or self.chr_id != other.chr_id:
@@ -786,7 +786,7 @@ class Genome_mm:
 class Fimo:
     def __init__(self,meme_motifs_filename, bg_filename,p_value=1.e-4,temp_directory='./'):
 
-        self.fimo_command= 'fimo --text --output-pthresh '+str(p_value)+'  --bgfile '+bg_filename+' '+meme_motifs_filename 
+        self.fimo_command= 'fimo --text --output-pthresh '+str(p_value)+'  -bgfile '+bg_filename+' '+meme_motifs_filename 
         self.temp_directory=temp_directory
         
         with open(meme_motifs_filename) as infile:
