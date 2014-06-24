@@ -17,7 +17,7 @@ from scipy.io.matlab import savemat
 
 import subprocess
 import tempfile
-impor time
+import time
 
 from bx.intervals.intersection import Intersecter, Interval
 from bx.seq.twobit import TwoBitFile
