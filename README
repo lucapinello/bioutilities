@@ -1,5 +1,6 @@
-Python Bioutilities:  free and open source python library  tools to streamline the analysis of genomics data. 
-
+Python Bioutilities:  
+Free and open source python library  tools to streamline the analysis of genomics data. 
+===================
 In the current version the library provides: 
 
 1.	A general genomic annotator, that go beyond the classic annotations such as promoter, exon, intron, intergenic, providing instead the possibility to annotate any set of genomic regions and also the opportunity to look for combinations of them.
