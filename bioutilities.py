@@ -573,7 +573,7 @@ class Gene:
         Coordinate.coordinates_to_bed(promoters,genome_name+'promoters.bed',minimal_format=True)
         del(promoters)
  
-       
+    tss=property(end)   
     tss=property(tss)
     tes=property(tes)
     distal_c=property(distal_c)
@@ -709,7 +709,7 @@ class Genome:
                 seq=seq[0:nbp].lower()
             
             if coordinate.strand=='-':
-                return Sequence.reverse_complement(seq)
+                return Sequence.reverse_complement(seq).lower()
             else:
                 return seq        
 
@@ -757,7 +757,7 @@ class Genome_mm:
             seq= self.chr[coordinate.chr_id][coordinate.bpstart-1:coordinate.bpend].lower()
         
         if coordinate.strand=='-':
-            return Sequence.reverse_complement(seq)
+            return Sequence.reverse_complement(seq).lower()
         else:
             return seq
     
