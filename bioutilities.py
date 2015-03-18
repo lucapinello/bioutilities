@@ -573,7 +573,7 @@ class Gene:
         Coordinate.coordinates_to_bed(promoters,genome_name+'promoters.bed',minimal_format=True)
         del(promoters)
  
-    end=property(end)   
+    tss=property(end)   
     tss=property(tss)
     tes=property(tes)
     distal_c=property(distal_c)
@@ -874,7 +874,7 @@ class Fimo:
                             
                         self.motif_id_to_name[motif_id]=motif_name
                         self.motif_id_to_index[motif_id]=motif_index
-                        self.motif_name_to_index[line.split()[2]]=motif_name
+                        self.motif_name_to_index[motif_name]=motif_name
                         self.motif_ids.append(motif_id)
                         self.motif_names.append(motif_name)
                         motif_index+=1
