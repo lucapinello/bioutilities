@@ -573,7 +573,7 @@ class Gene:
         Coordinate.coordinates_to_bed(promoters,genome_name+'promoters.bed',minimal_format=True)
         del(promoters)
  
-    tss=property(end)   
+    end=property(end)   
     tss=property(tss)
     tes=property(tes)
     distal_c=property(distal_c)
