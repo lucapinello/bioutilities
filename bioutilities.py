@@ -882,7 +882,10 @@ class Fimo:
                     print 'problem with this line:', line
 
         
-    def extract_motifs(self,seq, report_mode='full'):
+    def extract_motifs(self,seq, report_mode='full',single_motif=''):
+        
+        if single_motif and single_motif not in seld.motif_ids:
+            raise Exception('The motif %s is not contained int the database specified' % single_motif)
         if report_mode=='indexes_set':
                 motifs_in_sequence=set()
         elif report_mode=='fq_array':
@@ -900,7 +903,7 @@ class Fimo:
             tmp_filename=tmp_file.name
             tmp_file.close()
             
-            fimo_process=subprocess.Popen(self.fimo_command+' '+tmp_filename,stdin=None,stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
+            fimo_process=subprocess.Popen(self.fimo_command+' '+ (' --motif %s ' % single_motif if single_motif else '' )+tmp_filename,stdin=None,stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
             output=fimo_process.communicate()[0]
             fimo_process.wait()
             
