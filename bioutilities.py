@@ -905,7 +905,7 @@ class Fimo:
             tmp_file.close()
             
             if single_motif:
-                command_to_run=self.fimo_command.replace('--skip-matched-sequence','--skip-matched-sequence %s ' % single_motif)
+                command_to_run=self.fimo_command.replace('--skip-matched-sequence','--skip-matched-sequence --motif %s ' % single_motif)
             else:
                 command_to_run=self.fimo_command
                 
