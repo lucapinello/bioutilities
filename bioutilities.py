@@ -850,7 +850,7 @@ class Fimo:
     def __init__(self,meme_motifs_filename, bg_filename,p_value=1.e-4,temp_directory='./'):
         #be aware that they have changed the command line interface recently!
         
-        self.fimo_command= 'fimo --skip-matched-sequence --thresh '+str(p_value)+'  --bgfile '+bg_filename+' '+meme_motifs_filename 
+        self.fimo_command= 'fimo --verbosity 0 --skip-matched-sequence --thresh '+str(p_value)+'  --bgfile '+bg_filename+' '+meme_motifs_filename 
         self.temp_directory=temp_directory
         
         with open(meme_motifs_filename) as infile:
