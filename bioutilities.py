@@ -849,6 +849,7 @@ class Genome_2bit:
 class Fimo:
     def __init__(self,meme_motifs_filename, bg_filename,p_value=1.e-4,temp_directory='./'):
         #be aware that they have changed the command line interface recently!
+        
         self.fimo_command= 'fimo --text --thresh '+str(p_value)+'  --bgfile '+bg_filename+' '+meme_motifs_filename 
         self.temp_directory=temp_directory
         
@@ -903,7 +904,13 @@ class Fimo:
             tmp_filename=tmp_file.name
             tmp_file.close()
             
-            fimo_process=subprocess.Popen(self.fimo_command+' '+ (' --motif %s ' % single_motif if single_motif else '' )+tmp_filename,stdin=None,stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
+            if single_motif:
+                command_to_run=self.fimo_command.replace('--text','--text --motif %s ' % single_motif)
+            else:
+                command_to_run=self.fimo_command
+                
+            
+            fimo_process=subprocess.Popen(command_to_run+' '+ (' --motif %s ' % single_motif if single_motif else '' )+tmp_filename,stdin=None,stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
             output=fimo_process.communicate()[0]
             fimo_process.wait()
             
