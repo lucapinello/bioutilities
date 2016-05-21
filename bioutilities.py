@@ -887,7 +887,7 @@ class Fimo:
                     print 'problem with this line:', line
 
         
-    def extract_motifs(self,seq, report_mode='full',single_motif='',p_value=None,specific_strand=''):
+    def extract_motifs(self,seq, report_mode='full',single_motif='',p_value='',specific_strand=''):
         
         if single_motif and single_motif not in self.motif_ids:
             raise Exception('The motif %s is not contained int the database specified' % single_motif)
