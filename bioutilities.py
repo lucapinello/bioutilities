@@ -851,7 +851,11 @@ class Fimo:
         #be aware that they have changed the command line interface recently!
         
         self.fimo_command= 'fimo --verbosity 0 --skip-matched-sequence --thresh '+str(p_value)+'  --bgfile '+bg_filename+' '+meme_motifs_filename 
+        
         self.temp_directory=temp_directory
+        self.p_value=p_value
+        self.bg_filename=bg_filename
+        self.meme_motifs_filename=meme_motifs_filename
         
         with open(meme_motifs_filename) as infile:
             self.motif_id_to_name=dict()
@@ -883,7 +887,7 @@ class Fimo:
                     print 'problem with this line:', line
 
         
-    def extract_motifs(self,seq, report_mode='full',single_motif=''):
+    def extract_motifs(self,seq, report_mode='full',single_motif='',p_value=None,specific_strand=''):
         
         if single_motif and single_motif not in self.motif_ids:
             raise Exception('The motif %s is not contained int the database specified' % single_motif)
@@ -904,12 +908,12 @@ class Fimo:
             tmp_filename=tmp_file.name
             tmp_file.close()
             
-            if single_motif:
-                command_to_run=self.fimo_command.replace('--skip-matched-sequence','--skip-matched-sequence --motif %s ' % single_motif)
+            
+            if single_motif or p_value:
+                command_to_run='fimo --verbosity 0 %s --skip-matched-sequence --thresh %f --bgfile %s %s' %   ( ('--motif %s' % single_motif) if single_motif else '', p_value,self.bg_filename,self.meme_motifs_filename)
             else:
                 command_to_run=self.fimo_command
                 
-            
             fimo_process=subprocess.Popen(command_to_run+' '+tmp_filename,stdin=None,stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
             output=fimo_process.communicate()[0]
             fimo_process.wait()
@@ -931,9 +935,11 @@ class Fimo:
                         score=float(fields[5])
                         p_value=float(fields[6])
 
-                        
-                     
-                        motifs_in_sequence.append({'motif_id':motif_id,'name':motif_name,'start':c_start,'end':c_end,'strand':strand,'score':score,'p_value':p_value})
+                        if specific_strand:
+                            if specific_strand==strand:
+                                motifs_in_sequence.append({'motif_id':motif_id,'name':motif_name,'start':c_start,'end':c_end,'strand':strand,'score':score,'p_value':p_value})
+                        else:
+                            motifs_in_sequence.append({'motif_id':motif_id,'name':motif_name,'start':c_start,'end':c_end,'strand':strand,'score':score,'p_value':p_value})
                     elif report_mode=='indexes_set':
                         motifs_in_sequence.add(self.motif_name_to_index[motif_name])
                     
