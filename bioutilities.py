@@ -910,7 +910,7 @@ class Fimo:
             
             
             if single_motif or p_value:
-                command_to_run='fimo --verbosity 0 %s --skip-matched-sequence --thresh %f --bgfile %s %s' %   ( ('--motif %s' % single_motif) if single_motif else '', p_value,self.bg_filename,self.meme_motifs_filename)
+                command_to_run='fimo --verbosity 0 %s --skip-matched-sequence --thresh %f --bgfile %s %s' %   ( ('--motif %s' % single_motif) if single_motif else '', p_value if p_value else self.p_value,self.bg_filename,self.meme_motifs_filename)
             else:
                 command_to_run=self.fimo_command
                 
