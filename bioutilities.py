@@ -887,7 +887,7 @@ class Fimo:
                     print 'problem with this line:', line
 
         
-    def extract_motifs(self,seq, report_mode='full',single_motif='',p_value='',specific_strand=''):
+    def extract_motifs(self,seq, report_mode='full',single_motif=None,p_value=None,specific_strand=None):
         
         if single_motif and single_motif not in self.motif_ids:
             raise Exception('The motif %s is not contained int the database specified' % single_motif)
@@ -911,7 +911,7 @@ class Fimo:
             
             if single_motif or p_value:
                 
-                command_to_run='fimo --verbosity 0 %s --skip-matched-sequence --thresh %f --bgfile %s %s' %   ( ('--motif %s' % single_motif) if single_motif else '', self.p_value if (p_value is None) else p_value,self.bg_filename,self.meme_motifs_filename)
+                command_to_run='fimo --verbosity 0 %s --skip-matched-sequence --thresh %f --bgfile %s %s' %   ( ('--motif %s' % single_motif) if single_motif else '', p_value if p_value else self.p_value,self.bg_filename,self.meme_motifs_filename)
             else:
                 command_to_run=self.fimo_command
                 
@@ -941,6 +941,7 @@ class Fimo:
                                 motifs_in_sequence.append({'motif_id':motif_id,'name':motif_name,'start':c_start,'end':c_end,'strand':strand,'score':score,'p_value':p_value})
                         else:
                             motifs_in_sequence.append({'motif_id':motif_id,'name':motif_name,'start':c_start,'end':c_end,'strand':strand,'score':score,'p_value':p_value})
+                    
                     elif report_mode=='indexes_set':
                         motifs_in_sequence.add(self.motif_name_to_index[motif_name])
                     
