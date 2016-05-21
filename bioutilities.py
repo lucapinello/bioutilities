@@ -884,7 +884,7 @@ class Fimo:
         
     def extract_motifs(self,seq, report_mode='full',single_motif=''):
         
-        if single_motif and single_motif not in seld.motif_ids:
+        if single_motif and single_motif not in self.motif_ids:
             raise Exception('The motif %s is not contained int the database specified' % single_motif)
         if report_mode=='indexes_set':
                 motifs_in_sequence=set()
