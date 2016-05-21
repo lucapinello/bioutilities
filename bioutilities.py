@@ -933,7 +933,7 @@ class Fimo:
 
                         
                      
-                        motifs_in_sequence.append({'id':motif_id,'name':motif_name,'start':c_start,'end':c_end,'strand':strand,'score':score,'p_value':p_value})
+                        motifs_in_sequence.append({'motif_id':motif_id,'name':motif_name,'start':c_start,'end':c_end,'strand':strand,'score':score,'p_value':p_value})
                     elif report_mode=='indexes_set':
                         motifs_in_sequence.add(self.motif_name_to_index[motif_name])
                     
