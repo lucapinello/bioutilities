@@ -910,7 +910,7 @@ class Fimo:
                 command_to_run=self.fimo_command
                 
             
-            fimo_process=subprocess.Popen(command_to_run+' '+ (' --motif %s ' % single_motif if single_motif else '' )+tmp_filename,stdin=None,stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
+            fimo_process=subprocess.Popen(command_to_run+' '+tmp_filename,stdin=None,stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
             output=fimo_process.communicate()[0]
             fimo_process.wait()
             
