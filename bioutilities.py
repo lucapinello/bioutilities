@@ -887,7 +887,7 @@ class Fimo:
                     print 'problem with this line:', line
 
         
-    def extract_motifs(self,seq, report_mode='full',single_motif=None,p_value=None,specific_strand=None):
+    def extract_motifs(self,seq, report_mode='full',single_motif=None,p_value=None,specific_strand=None,specific_start=None):
         
         if single_motif and single_motif not in self.motif_ids:
             raise Exception('The motif %s is not contained int the database specified' % single_motif)
@@ -936,11 +936,17 @@ class Fimo:
                         score=float(fields[5])
                         p_value=float(fields[6])
 
-                        if specific_strand:
-                            if specific_strand==strand:
-                                motifs_in_sequence.append({'motif_id':motif_id,'name':motif_name,'start':c_start,'end':c_end,'strand':strand,'score':score,'p_value':p_value})
-                        else:
+                        append_motif=True
+                        if specific_strand and specific_strand!=strand:
+                            append_motif=False
+                        
+                        if specific_start and specific_start!=c_start:
+                            append_motif=False
+                            
+                        if append_motif:
                             motifs_in_sequence.append({'motif_id':motif_id,'name':motif_name,'start':c_start,'end':c_end,'strand':strand,'score':score,'p_value':p_value})
+                        
+                        
                     
                     elif report_mode=='indexes_set':
                         motifs_in_sequence.add(self.motif_name_to_index[motif_name])
