@@ -373,12 +373,14 @@ class Gene:
     
     regions=[8000,2000,0,1000]
     
-    def __init__(self,access,name,coordinate,regions=None,exons=None,introns=None,):
+    def __init__(self,access,name,coordinate,regions=None,exons=None,introns=None,cds_start=None,cds_end=None):
         self.access=access
         self.c=coordinate
         self.name=name
         self.exons=exons
         self.introns=introns
+        self.cds_start=cds_start
+        self.cds_end=cds_end
         
         if regions:
             self.regions=regions
@@ -449,6 +451,8 @@ class Gene:
                 idx_name=-4
                 idx_exon_starts=9
                 idx_exon_ends=10
+                idx_cds_start=6
+                idx_cds_end=7
             else:
                idx_chr_id=0
                idx_bpstart=1
@@ -458,7 +462,8 @@ class Gene:
                idx_name=3
                idx_exon_starts=10
                idx_exon_ends=11
-               
+               idx_cds_start=6
+               idx_cds_end=7               
                
            
             for gene_line in genes_file:
@@ -470,16 +475,19 @@ class Gene:
                 access=fields[idx_access]
                 name=fields[idx_name]
                 c=Coordinate(chr_id,bpstart,bpend,strand=strand)
+                cds_start=int(fields[idx_cds_start])
+                cds_end=int(fields[idx_cds_end])
 
-                if load_exons_introns_info:
+                if load_exons_introns_info and format=='txt':
+                    
                     exon_starts=map(int,fields[idx_exon_starts].split(',')[:-1])
                     exon_ends=map(int,fields[idx_exon_ends].split(',')[:-1])
 
                     exons=[Coordinate(chr_id,bpstart,bpend,strand=strand) for bpstart,bpend in zip(exon_starts,exon_ends)]
                     introns=[Coordinate(chr_id,bpstart+1,bpend-1,strand=strand) for bpstart,bpend in zip(exon_ends[:-1],exon_starts[1:])]
-                    genes_list.append(Gene(access,name,c,exons=exons,introns=introns,regions=regions))
+                    genes_list.append(Gene(access,name,c,exons=exons,introns=introns,regions=regions,cds_start=cds_start,cds_end=cds_end))
                 else:
-                    genes_list.append(Gene(access,name,c,regions=regions))
+                    genes_list.append(Gene(access,name,c,regions=regions,cds_start=cds_start,cds_end=cds_end))
                 
         return genes_list
 
